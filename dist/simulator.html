@@ -201,6 +201,25 @@ body[data-view="signal"] .signal-flow-section {
 
 .signal-flow-section .amp-section {
     margin-bottom: 15px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s ease;
+}
+
+/* Section grouping backgrounds */
+.signal-flow-section .stage-group-preamp {
+    background: rgba(78, 205, 196, 0.03);
+    border: 1px solid rgba(78, 205, 196, 0.1);
+}
+
+.signal-flow-section .stage-group-loop {
+    background: rgba(205, 196, 78, 0.03);
+    border: 1px solid rgba(205, 196, 78, 0.1);
+}
+
+.signal-flow-section .stage-group-power {
+    background: rgba(205, 78, 78, 0.03);
+    border: 1px solid rgba(205, 78, 78, 0.1);
 }
 
 .signal-flow-section .controls-row {
@@ -212,8 +231,14 @@ body[data-view="signal"] .signal-flow-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 85px;
+    min-width: 110px;
     gap: 4px;
+}
+
+/* Multi-control stages (Tonestack, PI) get wider minimum width */
+.signal-flow-section .control-group-unified[data-stage="tonestack"],
+.signal-flow-section .control-group-unified[data-stage="pi"] {
+    min-width: 220px;
 }
 
 .signal-flow-section .stage-label {
@@ -253,13 +278,31 @@ body[data-view="signal"] .signal-flow-section {
     margin-top: 2px;
 }
 
+/* Color-coded dBV levels based on signal intensity */
+.signal-flow-section .dbv-level.clean {
+    color: var(--color-led-green);
+}
+
+.signal-flow-section .dbv-level.warm {
+    color: var(--color-led-yellow);
+}
+
+.signal-flow-section .dbv-level.hot {
+    color: var(--color-led-orange);
+}
+
+.signal-flow-section .dbv-level.clipping {
+    color: var(--color-led-red);
+}
+
 /* Legacy stage-indicator (kept for stages without controls) */
 .signal-flow-section .stage-indicator {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 50px;
+    min-width: 90px;
     padding: 8px;
+    gap: 2px;
     background: rgba(var(--color-accent-rgb), 0.1);
     border-radius: var(--radius-md);
     border: 1px solid rgba(var(--color-accent-rgb), 0.3);
@@ -271,10 +314,38 @@ body[data-view="signal"] .signal-flow-section {
     font-weight: 600;
 }
 
+.signal-flow-section .stage-indicator .indicator-gain {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-family: 'Consolas', monospace;
+}
+
 .signal-flow-section .stage-indicator .indicator-level {
     font-size: 0.6rem;
     color: var(--color-text-secondary);
     font-family: 'Consolas', monospace;
+}
+
+/* Stage type visual hierarchy */
+.signal-flow-section .stage-indicator.stage-primary {
+    background: rgba(78, 205, 196, 0.15);
+    border: 1px solid rgba(78, 205, 196, 0.5);
+}
+
+.signal-flow-section .stage-indicator.stage-primary .indicator-name {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.signal-flow-section .stage-indicator.stage-utility {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+}
+
+.signal-flow-section .control-group-unified.stage-primary .stage-label {
+    color: var(--color-accent);
+    font-weight: 700;
 }
 
 .flow-arrow {
@@ -1028,7 +1099,7 @@ body[data-view="signal"] .signal-flow-section {
             </div>
 
             <!-- Preamp Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-preamp">
                 <h2 class="section-title">Preamp Stages</h2>
                 <div class="controls-row">
                     <div class="control-group-unified" data-stage="v1a">
@@ -1087,15 +1158,17 @@ body[data-view="signal"] .signal-flow-section {
                         </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V2a">
+                    <div class="stage-indicator stage-primary" data-stage-id="V2a" title="Third gain stage: +35 dB, clips at 38 dBV">
                         <span class="indicator-name">V2a</span>
+                        <span class="indicator-gain">+35 dB</span>
                         <span class="indicator-level" id="sf-level-v2a">--</span>
                     </div>
                 </div>
                 <div class="controls-row" style="margin-top: 15px;">
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V2b">
+                    <div class="stage-indicator stage-utility" data-stage-id="V2b" title="Cathode follower: 0 dB (unity gain buffer)">
                         <span class="indicator-name">V2b (CF)</span>
+                        <span class="indicator-gain">0 dB</span>
                         <span class="indicator-level" id="sf-level-v2b">--</span>
                     </div>
                     <span class="flow-arrow">→</span>
@@ -1119,6 +1192,7 @@ body[data-view="signal"] .signal-flow-section {
                                 <div class="value-edit-container">
                                     <span class="knob-value editable" id="master-sf-value">3</span>
                                 </div>
+                                <span class="dbv-level" id="sf-level-master">--</span>
                             </div>
                         </div>
                     </div>
@@ -1160,7 +1234,7 @@ body[data-view="signal"] .signal-flow-section {
             </div>
 
             <!-- FX Loop Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-loop">
                 <h2 class="section-title">FX Loop — Klein-ulator</h2>
                 <div class="controls-row">
                     <div class="switch-container">
@@ -1218,6 +1292,7 @@ body[data-view="signal"] .signal-flow-section {
                                 <div class="value-edit-container">
                                     <span class="knob-value editable" id="recovery-sf-value">5</span>
                                 </div>
+                                <span class="dbv-level" id="sf-level-recovery">--</span>
                             </div>
                         </div>
                     </div>
@@ -1225,7 +1300,7 @@ body[data-view="signal"] .signal-flow-section {
             </div>
 
             <!-- Power Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-power">
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
                     <div class="switch-container">
@@ -1233,7 +1308,7 @@ body[data-view="signal"] .signal-flow-section {
                         <span class="switch-label">Focus</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group-unified" data-stage="pi">
+                    <div class="control-group-unified stage-primary" data-stage="pi">
                         <span class="stage-label">PI</span>
                         <div class="control-row">
                             <div class="knob-wrapper">
@@ -1258,8 +1333,9 @@ body[data-view="signal"] .signal-flow-section {
                         </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Power">
+                    <div class="stage-indicator stage-primary" data-stage-id="Power" title="Power amp: +26 dB, 4×EL34, clips at 44 dBV">
                         <span class="indicator-name">Power</span>
+                        <span class="indicator-gain">+26 dB</span>
                         <span class="indicator-level" id="sf-level-power">--</span>
                     </div>
                 </div>
@@ -2232,13 +2308,27 @@ const stageElementMap = {
     'V1b': 'sf-level-v1b',
     'Pussy Trim': 'sf-level-pt',
     'V2a': 'sf-level-v2a',
-    'Tonestack': 'sf-level-tonestack',
     'V2b': 'sf-level-v2b',
+    'Master': 'sf-level-master',
+    'Tonestack': 'sf-level-tonestack',
     'Loop Out': 'sf-level-loopout',
+    'Recovery': 'sf-level-recovery',
     'PI': 'sf-level-pi',
     'Power': 'sf-level-power',
     'Captor X': 'sf-level-captor'
 };
+
+/**
+ * Get level class based on dBV value
+ * @param {number} level - dBV level
+ * @returns {string} CSS class name
+ */
+function getLevelClass(level) {
+    if (level < 20) return 'clean';
+    if (level < 35) return 'warm';
+    if (level < 40) return 'hot';
+    return 'clipping';
+}
 
 /**
  * Update signal flow view stage indicators
@@ -2251,6 +2341,8 @@ function updateSignalFlowIndicators(stages) {
             const el = document.getElementById(elId);
             if (el) {
                 el.textContent = formatLevel(stage.level, 0);
+                // Apply color coding based on level
+                el.className = 'dbv-level ' + getLevelClass(stage.level);
             }
         }
     });

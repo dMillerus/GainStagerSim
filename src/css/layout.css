@@ -84,6 +84,25 @@ body[data-view="signal"] .signal-flow-section {
 
 .signal-flow-section .amp-section {
     margin-bottom: 15px;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    transition: background-color 0.2s ease;
+}
+
+/* Section grouping backgrounds */
+.signal-flow-section .stage-group-preamp {
+    background: rgba(78, 205, 196, 0.03);
+    border: 1px solid rgba(78, 205, 196, 0.1);
+}
+
+.signal-flow-section .stage-group-loop {
+    background: rgba(205, 196, 78, 0.03);
+    border: 1px solid rgba(205, 196, 78, 0.1);
+}
+
+.signal-flow-section .stage-group-power {
+    background: rgba(205, 78, 78, 0.03);
+    border: 1px solid rgba(205, 78, 78, 0.1);
 }
 
 .signal-flow-section .controls-row {
@@ -95,8 +114,14 @@ body[data-view="signal"] .signal-flow-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 85px;
+    min-width: 110px;
     gap: 4px;
+}
+
+/* Multi-control stages (Tonestack, PI) get wider minimum width */
+.signal-flow-section .control-group-unified[data-stage="tonestack"],
+.signal-flow-section .control-group-unified[data-stage="pi"] {
+    min-width: 220px;
 }
 
 .signal-flow-section .stage-label {
@@ -136,13 +161,31 @@ body[data-view="signal"] .signal-flow-section {
     margin-top: 2px;
 }
 
+/* Color-coded dBV levels based on signal intensity */
+.signal-flow-section .dbv-level.clean {
+    color: var(--color-led-green);
+}
+
+.signal-flow-section .dbv-level.warm {
+    color: var(--color-led-yellow);
+}
+
+.signal-flow-section .dbv-level.hot {
+    color: var(--color-led-orange);
+}
+
+.signal-flow-section .dbv-level.clipping {
+    color: var(--color-led-red);
+}
+
 /* Legacy stage-indicator (kept for stages without controls) */
 .signal-flow-section .stage-indicator {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 50px;
+    min-width: 90px;
     padding: 8px;
+    gap: 2px;
     background: rgba(var(--color-accent-rgb), 0.1);
     border-radius: var(--radius-md);
     border: 1px solid rgba(var(--color-accent-rgb), 0.3);
@@ -154,10 +197,38 @@ body[data-view="signal"] .signal-flow-section {
     font-weight: 600;
 }
 
+.signal-flow-section .stage-indicator .indicator-gain {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-family: 'Consolas', monospace;
+}
+
 .signal-flow-section .stage-indicator .indicator-level {
     font-size: 0.6rem;
     color: var(--color-text-secondary);
     font-family: 'Consolas', monospace;
+}
+
+/* Stage type visual hierarchy */
+.signal-flow-section .stage-indicator.stage-primary {
+    background: rgba(78, 205, 196, 0.15);
+    border: 1px solid rgba(78, 205, 196, 0.5);
+}
+
+.signal-flow-section .stage-indicator.stage-primary .indicator-name {
+    color: var(--color-accent);
+    font-weight: 700;
+}
+
+.signal-flow-section .stage-indicator.stage-utility {
+    background: rgba(var(--color-accent-rgb), 0.08);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.2);
+}
+
+.signal-flow-section .control-group-unified.stage-primary .stage-label {
+    color: var(--color-accent);
+    font-weight: 700;
 }
 
 .flow-arrow {

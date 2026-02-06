@@ -8,3 +8,22 @@ Thumbs.db
 # Editor backups
 *~
 *.swp
+
+# Ceriatone Delivery Package (contains placeholder contact info - personalize before sending)
+ceriatone-chupacabra-simulator/
+ceriatone-chupacabra-simulator-v5.zip
+ceriatone-chupacabra-simulator-v5.tar.gz
+*.sha256
+
+# Delivery Package Documentation (session artifacts)
+email-draft.txt
+PERSONALIZATION_CHECKLIST.md
+DELIVERY_PACKAGE_SUMMARY.md
+QUICK_START_GUIDE.md
+IMPLEMENTATION_COMPLETE_DELIVERY.md
+WHAT_TO_DO_NEXT.txt
+
+# Delivery Package Source Files (need personalization before distribution)
+docs/LETTER_TO_CERIATONE.md
+README-CERIATONE.md
+LICENSE.txt

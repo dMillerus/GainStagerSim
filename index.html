@@ -252,7 +252,7 @@
             </div>
 
             <!-- Preamp Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-preamp">
                 <h2 class="section-title">Preamp Stages</h2>
                 <div class="controls-row">
                     <div class="control-group-unified" data-stage="v1a">
@@ -311,15 +311,17 @@
                         </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V2a">
+                    <div class="stage-indicator stage-primary" data-stage-id="V2a" title="Third gain stage: +35 dB, clips at 38 dBV">
                         <span class="indicator-name">V2a</span>
+                        <span class="indicator-gain">+35 dB</span>
                         <span class="indicator-level" id="sf-level-v2a">--</span>
                     </div>
                 </div>
                 <div class="controls-row" style="margin-top: 15px;">
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V2b">
+                    <div class="stage-indicator stage-utility" data-stage-id="V2b" title="Cathode follower: 0 dB (unity gain buffer)">
                         <span class="indicator-name">V2b (CF)</span>
+                        <span class="indicator-gain">0 dB</span>
                         <span class="indicator-level" id="sf-level-v2b">--</span>
                     </div>
                     <span class="flow-arrow">→</span>
@@ -343,6 +345,7 @@
                                 <div class="value-edit-container">
                                     <span class="knob-value editable" id="master-sf-value">3</span>
                                 </div>
+                                <span class="dbv-level" id="sf-level-master">--</span>
                             </div>
                         </div>
                     </div>
@@ -384,7 +387,7 @@
             </div>
 
             <!-- FX Loop Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-loop">
                 <h2 class="section-title">FX Loop — Klein-ulator</h2>
                 <div class="controls-row">
                     <div class="switch-container">
@@ -442,6 +445,7 @@
                                 <div class="value-edit-container">
                                     <span class="knob-value editable" id="recovery-sf-value">5</span>
                                 </div>
+                                <span class="dbv-level" id="sf-level-recovery">--</span>
                             </div>
                         </div>
                     </div>
@@ -449,7 +453,7 @@
             </div>
 
             <!-- Power Stages -->
-            <div class="amp-section">
+            <div class="amp-section stage-group-power">
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
                     <div class="switch-container">
@@ -457,7 +461,7 @@
                         <span class="switch-label">Focus</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group-unified" data-stage="pi">
+                    <div class="control-group-unified stage-primary" data-stage="pi">
                         <span class="stage-label">PI</span>
                         <div class="control-row">
                             <div class="knob-wrapper">
@@ -482,8 +486,9 @@
                         </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Power">
+                    <div class="stage-indicator stage-primary" data-stage-id="Power" title="Power amp: +26 dB, 4×EL34, clips at 44 dBV">
                         <span class="indicator-name">Power</span>
+                        <span class="indicator-gain">+26 dB</span>
                         <span class="indicator-level" id="sf-level-power">--</span>
                     </div>
                 </div>

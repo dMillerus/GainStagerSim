@@ -14,13 +14,27 @@ const stageElementMap = {
     'V1b': 'sf-level-v1b',
     'Pussy Trim': 'sf-level-pt',
     'V2a': 'sf-level-v2a',
-    'Tonestack': 'sf-level-tonestack',
     'V2b': 'sf-level-v2b',
+    'Master': 'sf-level-master',
+    'Tonestack': 'sf-level-tonestack',
     'Loop Out': 'sf-level-loopout',
+    'Recovery': 'sf-level-recovery',
     'PI': 'sf-level-pi',
     'Power': 'sf-level-power',
     'Captor X': 'sf-level-captor'
 };
+
+/**
+ * Get level class based on dBV value
+ * @param {number} level - dBV level
+ * @returns {string} CSS class name
+ */
+function getLevelClass(level) {
+    if (level < 20) return 'clean';
+    if (level < 35) return 'warm';
+    if (level < 40) return 'hot';
+    return 'clipping';
+}
 
 /**
  * Update signal flow view stage indicators
@@ -33,6 +47,8 @@ export function updateSignalFlowIndicators(stages) {
             const el = document.getElementById(elId);
             if (el) {
                 el.textContent = formatLevel(stage.level, 0);
+                // Apply color coding based on level
+                el.className = 'dbv-level ' + getLevelClass(stage.level);
             }
         }
     });
