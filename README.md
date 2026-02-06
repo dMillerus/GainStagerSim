@@ -391,8 +391,7 @@ This project is licensed under the **MIT License**—see [LICENSE.txt](LICENSE.t
 
 ## 🙏 Acknowledgments
 
-- **Ceriatone**: For the outstanding Chupacabra 100W amplifier design
-- **Klein-ulator**: For the buffered FX loop design
+- **Ceriatone**: For the outstanding Chupacabra 100W amplifier and Klein-ulator buffered FX loop designs
 - **Marshall / Jose Arredondo**: For the foundational circuit topology
 - **The tube amp community**: For shared knowledge and circuit analysis resources
 - **Claude Code (Anthropic)**: AI-assisted development tool used to create this entire project through iterative pair programming sessions
@@ -407,9 +406,15 @@ This project is licensed under the **MIT License**—see [LICENSE.txt](LICENSE.t
 
 ---
 
-## 🎸 About the Ceriatone Chupacabra 100W
+## 🎸 About the Gear
+
+### Ceriatone Chupacabra 100W
 
 The Chupacabra is a boutique high-gain amplifier based on the legendary Jose Arredondo modifications to Marshall amplifiers, famously used by artists like James Hetfield of Metallica. The Ceriatone implementation adds modern refinements like the ERA voicing switch, Pussy Trimmer attenuator, and Focus boost—all modeled in this simulator.
+
+### Ceriatone Klein-ulator
+
+The Klein-ulator is Ceriatone's solid-state buffered FX loop pedal, designed as an accessible alternative to the rare and expensive tube-based Dumbleator. It features SEND, RETURN, and RECOVERY controls with bright switches, allowing time-based effects (delay, reverb, chorus) to be placed after the preamp stages while preserving tone quality.
 
 **Learn more:** [https://ceriatone.com/](https://ceriatone.com/)
 
