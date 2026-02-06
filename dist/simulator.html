@@ -155,6 +155,17 @@ h1 {
     border-bottom: 1px solid var(--color-border);
 }
 
+.section-note {
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
+    font-style: italic;
+    margin: -10px 0 15px 0;
+    padding: 8px 12px;
+    background: rgba(255, 165, 0, 0.05);
+    border-left: 2px solid var(--color-accent);
+    border-radius: 4px;
+}
+
 .controls-row {
     display: flex;
     flex-wrap: wrap;
@@ -830,7 +841,7 @@ body[data-view="signal"] .signal-flow-section {
 
             <!-- Preamp Section (Front Panel) -->
             <div class="amp-section" id="preamp-section">
-                <h2 class="section-title">Preamp — Chupacabra 100 (Front Panel)</h2>
+                <h2 class="section-title">Front Panel Controls — Chupacabra 100</h2>
                 <div class="controls-row">
                     <div class="control-group" data-stage="gain1">
                         <div class="knob-container">
@@ -928,7 +939,8 @@ body[data-view="signal"] .signal-flow-section {
 
             <!-- Power Section (Rear Panel) -->
             <div class="amp-section" id="power-section">
-                <h2 class="section-title">Power Section — Chupacabra 100 (Rear Panel)</h2>
+                <h2 class="section-title">Rear Panel Controls — Chupacabra 100</h2>
+                <p class="section-note">Note: Master is pre-tonestack in signal path. See Signal Flow View for signal order.</p>
                 <div class="controls-row">
                     <div class="control-group" data-stage="master">
                         <div class="knob-container">
@@ -1082,6 +1094,11 @@ body[data-view="signal"] .signal-flow-section {
                 </div>
                 <div class="controls-row" style="margin-top: 15px;">
                     <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V2b">
+                        <span class="indicator-name">V2b (CF)</span>
+                        <span class="indicator-level" id="sf-level-v2b">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
                     <div class="switch-container">
                         <div class="era-switch" id="era-switch-sf">
                             <div class="era-pos" data-era="plexi">Plexi</div>
@@ -1090,6 +1107,22 @@ body[data-view="signal"] .signal-flow-section {
                         </div>
                         <span class="switch-label">ERA</span>
                     </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group-unified" data-stage="master">
+                        <span class="stage-label">Master</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                                </div>
+                                <span class="knob-label">Master</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="master-sf-value">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="flow-arrow">→</span>
                     <div class="control-group-unified" data-stage="tonestack">
                         <span class="stage-label">Tonestack</span>
                         <div class="control-row">
@@ -1122,11 +1155,6 @@ body[data-view="signal"] .signal-flow-section {
                                 <span class="dbv-level" id="sf-level-tonestack">--</span>
                             </div>
                         </div>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V2b">
-                        <span class="indicator-name">V2b</span>
-                        <span class="indicator-level" id="sf-level-v2b">--</span>
                     </div>
                 </div>
             </div>
@@ -1200,23 +1228,9 @@ body[data-view="signal"] .signal-flow-section {
             <div class="amp-section">
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
-                    <div class="control-group-unified" data-stage="master">
-                        <span class="stage-label">Master</span>
-                        <div class="control-row">
-                            <div class="knob-wrapper">
-                                <div class="knob-container">
-                                    <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
-                                </div>
-                                <span class="knob-label">Master</span>
-                                <div class="value-edit-container">
-                                    <span class="knob-value editable" id="master-sf-value">3</span>
-                                </div>
-                            </div>
-                            <div class="switch-wrapper">
-                                <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
-                                <span class="switch-label">Focus</span>
-                            </div>
-                        </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
+                        <span class="switch-label">Focus</span>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="control-group-unified" data-stage="pi">
