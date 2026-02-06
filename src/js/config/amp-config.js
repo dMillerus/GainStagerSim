@@ -1,17 +1,37 @@
 /**
  * amp-config.js - Amplifier configuration constants
  * Ceriatone Chupacabra 100W + Klein-ulator settings
+ *
+ * CIRCUIT TOPOLOGY: Marshall '59 Super Lead + Jose Arredondo + Ceriatone Mods
+ * ----------------------------------------------------------------------------
+ * - V1a, V1b, V2a: Cascaded gain stages (Jose "firebreathing" mod)
+ * - V2b: CATHODE FOLLOWER (unity gain buffer, drives tone stack)
+ * - ERA: Switchable diode clipping (Plexi/80s/Modern voicing)
+ * - Master: PRE-tonestack gain control (Chupacabra-specific design)
+ * - Tonestack: Passive EQ network
+ * - FX Loop: Taps from tonestack output (Klein-ulator buffered loop)
+ * - PI: Long-tail pair phase inverter
+ * - Power: 4×EL34 cathode-biased output section
+ *
+ * CHUPACABRA-SPECIFIC FEATURES:
+ * - Pre-tonestack Master (differs from some Jose kits, verified via FX loop behavior)
+ * - Modern ERA mode clips earliest (12 dBV), Plexi loosest (bypass)
+ * - Pussy Trimmer: Grid shunt attenuator between Gain2 and V2a (Ceriatone feature)
+ * - Focus Switch: +1.0 dB boost pre-PI (Ceriatone feature)
+ *
+ * CORRECTIONS MADE:
+ * - V2b corrected to cathode follower (was incorrectly modeled as +30dB gain stage)
  */
 
 /**
  * Tube stage configurations
- * Each stage has gain (dB), threshold (dBV), knee (dB), and name
+ * Each stage has gain (dB), threshold (dBV), knee (dB), name, and optional type
  */
 export const tubeStages = {
     v1a:   { gain: 35, threshold: 38, knee: 6, name: 'V1a' },
     v1b:   { gain: 30, threshold: 32, knee: 6, name: 'V1b' },
     v2a:   { gain: 35, threshold: 38, knee: 6, name: 'V2a' },
-    v2b:   { gain: 30, threshold: 35, knee: 6, name: 'V2b' },
+    v2b:   { gain: 0,  threshold: null, knee: null, name: 'V2b', type: 'cathode-follower' },  // Unity gain buffer
     pi:    { gain: 20, threshold: 40, knee: 6, name: 'PI' },
     power: { gain: 26, threshold: 44, knee: 8, name: 'Power' }
 };

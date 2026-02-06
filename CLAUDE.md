@@ -51,23 +51,24 @@ GainStagerSim/
 
 ## Domain Context
 
-- **Chupacabra 100**: Jose Arredondo-inspired high-gain Marshall derivative. 4×EL34 power section, three cascaded ECC83 preamp stages, dual gain controls, ERA switch (Plexi/'80s/Modern voicing), **pre-tonestack master volume** (controls drive into EQ section), buffered FX loop.
+- **Chupacabra 100**: Jose Arredondo-inspired high-gain Marshall derivative. 4×EL34 power section, three cascaded ECC83 preamp gain stages (V1a/V1b/V2a) + V2b cathode follower buffer, dual gain controls, ERA switch (Plexi/'80s/Modern voicing), **pre-tonestack master volume** (controls drive into EQ section), buffered FX loop.
 - **Klein-ulator**: Standalone buffered FX loop unit with SEND/RETURN/RECOVERY controls. Adds ~+2.5 dB net gain at default settings. Taps from tonestack output.
 - **Signal chain**: 21+ metered stages from guitar pickup through Captor X reactive load.
-- **Circuit topology**: V2a → V2b → ERA → **Master** → Tonestack → [FX Loop] → PI → Power
+- **Circuit topology**: V1a → V1b → V2a → **V2b (cathode follower)** → ERA → **Master** → Tonestack → [FX Loop] → PI → Power
+- **Chupacabra-specific features**: Pre-tonestack Master (differs from some Jose kits), Modern ERA clips earliest (verified correct), Pussy Trimmer (Ceriatone feature), Focus switch (Ceriatone feature)
 
 ## Gain Math Model
 
 All levels in dBV. Reference: -6 dBV (bridge humbucker).
 
-| Stage | Gain | Clip Threshold |
-|-------|------|----------------|
-| V1a | 35 dB | 38 dBV |
-| V1b | 30 dB | 32 dBV |
-| V2a | 35 dB | 38 dBV |
-| V2b | 30 dB | 35 dBV |
-| PI | 20 dB | 40 dBV |
-| Power | 26 dB | 44 dBV |
+| Stage | Gain | Clip Threshold | Notes |
+|-------|------|----------------|-------|
+| V1a | 35 dB | 38 dBV | First gain stage |
+| V1b | 30 dB | 32 dBV | Second gain stage |
+| V2a | 35 dB | 38 dBV | Third gain stage |
+| V2b | **0 dB** | **N/A** | **Cathode follower** (unity gain buffer, drives tonestack) |
+| PI | 20 dB | 40 dBV | Phase inverter |
+| Power | 26 dB | 44 dBV | 4×EL34 output section |
 
 **Key formulas** (in `src/js/core/gain-math.js`):
 - `softClip(level, threshold, knee=6)` — tanh compression above onset
@@ -77,10 +78,11 @@ All levels in dBV. Reference: -6 dBV (bridge humbucker).
 - `tonestackMod(bass, mid, treble)` — EQ insertion loss modification
 
 **Constants** (in `src/js/config/amp-config.js`):
-- ERA loss: Plexi -7 dB, '80s -12 dB, Modern -20 dB
-- Bright boosts: Mid +1.5 dB, High +2.5 dB
+- ERA clipping thresholds: Plexi (bypass), '80s 18 dBV, Modern 12 dBV
+- Bright boosts: Subtle +1.5 dB, Aggressive +2.5 dB
 - Cable loss: 0.5 dB
 - Recovery compensation: +2.5 dB at noon
+- Tonestack base loss: -10 dB (with ±1.5 dB EQ modification)
 
 ## Development Workflow
 
@@ -165,11 +167,23 @@ git commit -m "Build: update single-file distribution"
 
 ## Known Limitations
 
-1. BRIGHT switches are broadband — not frequency-dependent
-2. Speaker output runs ~2dB hot vs theoretical 100W/8Ω
-3. No frequency-domain modeling (broadband amplitude only)
-4. FX loop assumes unity gain from external pedals
-5. Simplified tonestack interaction modeling
+1. BRIGHT switches are broadband — not frequency-dependent (real circuits use capacitor-based high-pass)
+2. V2b cathode follower simplified (real circuit has slight impedance loading effects)
+3. ERA diode clipping uses soft threshold model (real diodes have sharper knee)
+4. No frequency-domain modeling (broadband amplitude only)
+5. FX loop assumes unity gain from external pedals
+6. Simplified tonestack interaction modeling (component value interactions not modeled)
+7. Speaker output runs ~2dB hot vs theoretical 100W/8Ω
+
+## Circuit Topology Notes
+
+**V2b Cathode Follower**: In the actual Chupacabra circuit (following standard Marshall topology), V2b is a cathode follower that provides:
+- **Unity voltage gain** (0 dB) — no amplification
+- **High current gain** — low output impedance to drive passive tonestack
+- **No clipping** — cathode followers don't clip like gain stages
+- Total preamp gain: ~100 dB (V1a 35 dB + V1b 30 dB + V2a 35 dB)
+
+**Corrected February 2026**: Earlier versions incorrectly modeled V2b as a +30 dB gain stage with 35 dBV clipping threshold. This has been corrected to accurately represent the cathode follower topology.
 
 ## Quick Reference
 

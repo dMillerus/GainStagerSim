@@ -97,12 +97,19 @@ export function calculateSignalChain(state) {
     level = clip.clamped;
     addStage('V2a', level, v2a.gain, clip.drive, 'preamp', v2a.threshold);
 
-    // Stage 10: V2b (fourth preamp gain stage)
+    // Stage 10: V2b (cathode follower - unity gain buffer)
     const v2b = tubeStages.v2b;
-    level += v2b.gain;
-    clip = softClip(level, v2b.threshold, v2b.knee);
-    level = clip.clamped;
-    addStage('V2b', level, v2b.gain, clip.drive, 'preamp', v2b.threshold);
+    level += v2b.gain;  // 0 dB gain (unity buffer)
+    // Cathode followers don't clip like gain stages - they provide impedance buffering
+    if (v2b.type === 'cathode-follower') {
+        // Unity gain buffer - no clipping
+        addStage('V2b', level, v2b.gain, 0, 'preamp', null);
+    } else {
+        // Legacy path (shouldn't execute with corrected config)
+        clip = softClip(level, v2b.threshold, v2b.knee);
+        level = clip.clamped;
+        addStage('V2b', level, v2b.gain, clip.drive, 'preamp', v2b.threshold);
+    }
 
     // Stage 11: ERA Diode Clipping (post-V2b, pre-Master)
     const eraConfig = eraClipping[s.era];

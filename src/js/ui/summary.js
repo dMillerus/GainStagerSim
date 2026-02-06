@@ -68,14 +68,14 @@ export function generateToneRecommendation(stages, state) {
     } else if (heavyClipping.length > 3) {
         tone = `Heavily saturated tone with ${heavyClipping.length} stages in hard clipping. `;
         tone += 'Expect compressed dynamics and thick distortion. ';
-        if (s.era === 'modern') tone += 'Modern voicing adds tight low-end definition.';
-        else if (s.era === 'plexi') tone += 'Plexi voicing provides open, dynamic response.';
-        else tone += "'80s voicing balances crunch with clarity.";
+        if (s.era === 'modern') tone += 'Modern voicing with heavy diode compression adds tight definition.';
+        else if (s.era === 'plexi') tone += 'Plexi mode bypasses ERA clipping for cleanest, most dynamic response.';
+        else tone += "'80s voicing with moderate diode clipping balances crunch with clarity.";
     } else if (clippingStages.length > 0) {
         tone = `${clippingStages.length} stage(s) in soft clipping — `;
 
         const preampClipping = clippingStages.filter(st =>
-            ['V1a', 'V1b', 'V2a', 'V2b'].includes(st.name));
+            ['V1a', 'V1b', 'V2a'].includes(st.name));  // V2b excluded (cathode follower)
         const powerClipping = clippingStages.filter(st =>
             ['PI', 'Power'].includes(st.name));
 
@@ -103,8 +103,31 @@ export function generateToneRecommendation(stages, state) {
         tone += ' FX loop bright switches add presence to the signal.';
     }
 
-    if (s.bright1 || s.bright2) {
-        tone += ' Preamp bright switches engaged for added sparkle.';
+    if (s.bright1 !== 'off' || s.bright2 !== 'off') {
+        const bright1Desc = s.bright1 === 'aggressive' ? 'aggressive (4700pF)' :
+                           s.bright1 === 'subtle' ? 'subtle (500pF)' : '';
+        const bright2Desc = s.bright2 === 'aggressive' ? 'aggressive (4700pF)' :
+                           s.bright2 === 'subtle' ? 'subtle (500pF)' : '';
+
+        if (bright1Desc && bright2Desc) {
+            tone += ` Bright 1 ${bright1Desc}, Bright 2 ${bright2Desc}.`;
+        } else if (bright1Desc) {
+            tone += ` Bright 1 ${bright1Desc}.`;
+        } else if (bright2Desc) {
+            tone += ` Bright 2 ${bright2Desc}.`;
+        }
+    }
+
+    // Add ERA clipping description
+    const eraStage = stages.find(st => st.name.startsWith('ERA'));
+    if (eraStage && eraStage.drive > 0) {
+        if (s.era === 'modern') {
+            tone += ' ERA purple diodes heavily clipping signal for maximum compression.';
+        } else if (s.era === '80s') {
+            tone += ' ERA orange diodes moderately clipping for controlled saturation.';
+        }
+    } else if (s.era === 'plexi') {
+        tone += ' ERA bypassed (60s mode) for cleanest signal path.';
     }
 
     const toneTextEl = document.getElementById('tone-text');
