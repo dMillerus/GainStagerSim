@@ -5,14 +5,15 @@
 /**
  * Switch configuration
  * Maps switch IDs to their state keys
+ * type: 'toggle' for boolean switches, 'three-position' for bright switches
  */
 const switchConfig = {
-    'loop-bypass': { stateKey: 'loopEnabled', default: true },
-    'send-bright': { stateKey: 'sendBright', default: false },
-    'return-bright': { stateKey: 'returnBright', default: false },
-    'focus': { stateKey: 'focus', default: false },
-    'bright1': { stateKey: 'bright1', default: false },
-    'bright2': { stateKey: 'bright2', default: false }
+    'loop-bypass': { stateKey: 'loopEnabled', default: true, type: 'toggle' },
+    'send-bright': { stateKey: 'sendBright', default: false, type: 'toggle' },
+    'return-bright': { stateKey: 'returnBright', default: false, type: 'toggle' },
+    'focus': { stateKey: 'focus', default: false, type: 'toggle' },
+    'bright1': { stateKey: 'bright1', default: 'off', type: 'three-position' },
+    'bright2': { stateKey: 'bright2', default: 'off', type: 'three-position' }
 };
 
 /**
@@ -29,20 +30,35 @@ export function setupSwitches(onUpdate) {
         if (!el) return;
 
         // Set initial state
-        if (config.default) {
-            el.classList.add('active');
-            el.dataset.state = 'ON';
+        if (config.type === 'toggle') {
+            if (config.default) {
+                el.classList.add('active');
+                el.dataset.state = 'ON';
+            }
+        } else if (config.type === 'three-position') {
+            el.dataset.state = config.default.toUpperCase();
         }
 
         const handleClick = () => {
-            const currentState = el.classList.contains('active');
-            const newState = !currentState;
+            if (config.type === 'toggle') {
+                const currentState = el.classList.contains('active');
+                const newState = !currentState;
 
-            // Sync both main and SF versions
-            syncSwitch(id, newState);
+                // Sync both main and SF versions
+                syncSwitch(id, newState);
 
-            // Notify state change
-            onUpdate(config.stateKey, newState);
+                // Notify state change
+                onUpdate(config.stateKey, newState);
+            } else if (config.type === 'three-position') {
+                const currentState = el.dataset.state?.toLowerCase() || 'off';
+                const nextState = cycleThreePosition(currentState);
+
+                // Sync both main and SF versions
+                syncThreePosition(id, nextState);
+
+                // Notify state change
+                onUpdate(config.stateKey, nextState);
+            }
         };
 
         el.addEventListener('click', handleClick);
@@ -60,14 +76,25 @@ export function setupSwitches(onUpdate) {
             const mainEl = document.getElementById(mirrorId);
             if (!mainEl) return;
 
-            const currentState = mainEl.classList.contains('active');
-            const newState = !currentState;
+            if (config.type === 'toggle') {
+                const currentState = mainEl.classList.contains('active');
+                const newState = !currentState;
 
-            // Sync both versions
-            syncSwitch(mirrorId, newState);
+                // Sync both versions
+                syncSwitch(mirrorId, newState);
 
-            // Notify state change
-            onUpdate(config.stateKey, newState);
+                // Notify state change
+                onUpdate(config.stateKey, newState);
+            } else if (config.type === 'three-position') {
+                const currentState = mainEl.dataset.state?.toLowerCase() || 'off';
+                const nextState = cycleThreePosition(currentState);
+
+                // Sync both versions
+                syncThreePosition(mirrorId, nextState);
+
+                // Notify state change
+                onUpdate(config.stateKey, nextState);
+            }
         };
 
         sw.addEventListener('click', handleClick);
@@ -75,6 +102,38 @@ export function setupSwitches(onUpdate) {
     });
 
     return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Cycle through three-position switch states
+ * @param {string} currentState - Current state ('off', 'subtle', 'aggressive')
+ * @returns {string} Next state
+ */
+function cycleThreePosition(currentState) {
+    const states = ['off', 'subtle', 'aggressive'];
+    const currentIndex = states.indexOf(currentState);
+    const nextIndex = (currentIndex + 1) % states.length;
+    return states[nextIndex];
+}
+
+/**
+ * Sync three-position switch state between main and SF versions
+ * @param {string} baseId - Base switch ID (without -sf)
+ * @param {string} state - New state ('off', 'subtle', 'aggressive')
+ */
+export function syncThreePosition(baseId, state) {
+    const mainEl = document.getElementById(baseId);
+    const sfEl = document.getElementById(`${baseId}-sf`);
+
+    [mainEl, sfEl].forEach(el => {
+        if (el) {
+            el.dataset.state = state.toUpperCase();
+            // Add visual classes based on state
+            el.classList.toggle('active', state !== 'off');
+            el.classList.toggle('subtle', state === 'subtle');
+            el.classList.toggle('aggressive', state === 'aggressive');
+        }
+    });
 }
 
 /**

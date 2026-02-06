@@ -96,6 +96,26 @@ export function eraModifiedTaper(masterTaper, era) {
 }
 
 /**
+ * Diode clipping model for back-to-back diode pairs
+ * Models hard clipping behavior of diodes to ground (ERA switch)
+ * @param {number} level - Input level in dBV
+ * @param {number} threshold - Diode forward voltage threshold in dBV
+ * @param {string} type - 'symmetrical' or 'asymmetrical' (default symmetrical)
+ * @returns {Object} { clamped: output level, raw: input level, drive: clipping amount }
+ */
+export function diodeClip(level, threshold, type = 'symmetrical') {
+    if (level <= threshold) {
+        return { clamped: level, raw: level, drive: 0 };
+    }
+
+    // Hard clip at threshold (diodes conduct and shunt to ground)
+    const clampedLevel = threshold;
+    const drive = level - clampedLevel;
+
+    return { clamped: clampedLevel, raw: level, drive };
+}
+
+/**
  * Pussy Trim taper - variable resistor to ground on V2a grid
  * At 10: 0 dB (signal passes through)
  * At 0: Full cut (-40 dB, effectively silent)
