@@ -1,0 +1,138 @@
+/* meters.css - Meter panel components */
+
+/* Fixed Bottom Meter Panel */
+.meter-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--color-border);
+    padding: 12px 20px;
+    z-index: 100;
+    transition: transform var(--transition-slow) ease;
+}
+
+.meter-panel.hidden {
+    transform: translateY(100%);
+}
+
+.meter-panel-content {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    justify-content: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-bottom: 5px;
+}
+
+.meter-panel-content::-webkit-scrollbar {
+    height: 6px;
+}
+
+.meter-panel-content::-webkit-scrollbar-track {
+    background: var(--color-bg-control-dark);
+    border-radius: var(--radius-sm);
+}
+
+.meter-panel-content::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: var(--radius-sm);
+    opacity: 0.5;
+}
+
+.meter-group {
+    display: flex;
+    gap: 4px;
+}
+
+.meter-divider {
+    width: 2px;
+    background: var(--color-accent);
+    opacity: 0.3;
+    margin: 5px 6px;
+    align-self: stretch;
+}
+
+.meter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 48px;
+    padding: 6px 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.meter-name {
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    white-space: nowrap;
+}
+
+/* Clip LEDs */
+.clip-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
+    margin-bottom: 3px;
+    transition: all 0.15s;
+}
+
+.clip-led.green {
+    background: var(--color-led-green);
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+}
+
+.clip-led.yellow {
+    background: var(--color-led-yellow);
+    box-shadow: 0 0 8px rgba(241, 196, 15, 0.6);
+}
+
+.clip-led.orange {
+    background: var(--color-led-orange);
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.6);
+}
+
+.clip-led.red {
+    background: var(--color-led-red);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+}
+
+/* Meter Bar */
+.meter-bar-container {
+    width: 10px;
+    height: var(--meter-bar-height);
+    background: var(--color-bg-control-dark);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 3px;
+}
+
+.meter-bar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(0deg, var(--color-led-green), var(--color-led-yellow) 60%, var(--color-led-red) 90%);
+    transition: height var(--transition-fast);
+}
+
+.meter-value {
+    font-size: 0.6rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    font-family: 'Consolas', monospace;
+}
+
+.meter-drive {
+    font-size: 0.5rem;
+    color: var(--color-led-orange);
+    font-family: 'Consolas', monospace;
+    height: 10px;
+}

@@ -1,0 +1,43 @@
+/* base.css - Reset, body, typography */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 140px;
+    transition: padding-bottom var(--transition-slow) ease;
+}
+
+body.meter-panel-hidden {
+    padding-bottom: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--color-accent);
+    text-shadow: 0 0 20px var(--color-accent-glow);
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}

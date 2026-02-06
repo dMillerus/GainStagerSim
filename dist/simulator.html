@@ -1,0 +1,2861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chupacabra + Klein-ulator Gain Staging Simulator v5</title>
+    <!-- CSS Modules -->
+    <style>
+/* variables.css - CSS Custom Properties (colors, sizes, shadows) */
+
+:root {
+    /* Colors - Primary */
+    --color-accent: #4ecdc4;
+    --color-accent-rgb: 78, 205, 196;
+    --color-accent-dark: #2a9d8f;
+    --color-accent-glow: rgba(78, 205, 196, 0.3);
+    --color-accent-glow-strong: rgba(78, 205, 196, 0.5);
+
+    /* Colors - Background */
+    --color-bg-primary: #1a1a2e;
+    --color-bg-secondary: #16213e;
+    --color-bg-tertiary: #0f0f23;
+    --color-bg-panel: #252538;
+    --color-bg-panel-dark: #1a1a28;
+    --color-bg-section: #2a2a3e;
+    --color-bg-section-dark: #1e1e2e;
+    --color-bg-control: #2a2a3a;
+    --color-bg-control-dark: #1a1a2a;
+
+    /* Colors - Text */
+    --color-text-primary: #e0e0e0;
+    --color-text-secondary: #aaa;
+    --color-text-muted: #888;
+
+    /* Colors - Borders */
+    --color-border: #3a3a4e;
+    --color-border-light: #3a3a4a;
+
+    /* Colors - Status LEDs */
+    --color-led-green: #2ecc71;
+    --color-led-yellow: #f1c40f;
+    --color-led-orange: #e67e22;
+    --color-led-red: #e74c3c;
+
+    /* Shadows */
+    --shadow-panel: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    --shadow-knob: 0 4px 8px rgba(0, 0, 0, 0.4),
+                   inset 0 2px 4px rgba(255, 255, 255, 0.1),
+                   0 0 0 3px #1a1a2a,
+                   0 0 0 4px #3a3a4a;
+
+    /* Sizing */
+    --knob-size: 60px;
+    --knob-size-mobile: 50px;
+    --meter-bar-height: 35px;
+    --meter-bar-height-mobile: 30px;
+
+    /* Transitions */
+    --transition-fast: 0.1s;
+    --transition-normal: 0.2s;
+    --transition-slow: 0.3s;
+
+    /* Border Radius */
+    --radius-sm: 3px;
+    --radius-md: 6px;
+    --radius-lg: 12px;
+}
+
+</style>
+    <style>
+/* base.css - Reset, body, typography */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    padding: 20px;
+    padding-bottom: 140px;
+    transition: padding-bottom var(--transition-slow) ease;
+}
+
+body.meter-panel-hidden {
+    padding-bottom: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: var(--color-accent);
+    text-shadow: 0 0 20px var(--color-accent-glow);
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+}
+
+</style>
+    <style>
+/* layout.css - Sections, panels, rows */
+
+/* Settings Panel */
+.settings-panel {
+    background: linear-gradient(180deg, var(--color-bg-panel) 0%, var(--color-bg-panel-dark) 100%);
+    border-radius: var(--radius-lg);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-panel), var(--shadow-inset);
+    border: 1px solid var(--color-border);
+}
+
+.settings-panel .section-title {
+    margin-bottom: 12px;
+}
+
+.settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+}
+
+/* Amp Sections */
+.amp-section {
+    background: linear-gradient(180deg, var(--color-bg-section) 0%, var(--color-bg-section-dark) 100%);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-panel), var(--shadow-inset);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+/* View Mode Styles - Amp View (default) */
+body[data-view="amp"] .signal-flow-section {
+    display: none;
+}
+
+body[data-view="amp"] .amp-view-section {
+    display: block;
+}
+
+/* View Mode Styles - Signal Flow View */
+body[data-view="signal"] .amp-view-section {
+    display: none;
+}
+
+body[data-view="signal"] .signal-flow-section {
+    display: block;
+}
+
+.signal-flow-section .amp-section {
+    margin-bottom: 15px;
+}
+
+.signal-flow-section .controls-row {
+    gap: 15px;
+}
+
+.signal-flow-section .stage-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    padding: 8px;
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+}
+
+.signal-flow-section .stage-indicator .indicator-name {
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.signal-flow-section .stage-indicator .indicator-level {
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+    font-family: 'Consolas', monospace;
+}
+
+.flow-arrow {
+    color: var(--color-accent);
+    font-size: 1.2rem;
+    align-self: center;
+    opacity: 0.5;
+}
+
+</style>
+    <style>
+/* controls.css - Knobs, switches, selectors */
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    background: var(--color-bg-control-dark);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.view-option {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.view-option:hover {
+    color: var(--color-text-secondary);
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+.view-option.active {
+    background: #3a5a5a;
+    color: var(--color-accent);
+}
+
+/* Knobs */
+.knob-container {
+    position: relative;
+    width: var(--knob-size);
+    height: var(--knob-size);
+    margin-bottom: 8px;
+}
+
+.knob {
+    width: var(--knob-size);
+    height: var(--knob-size);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #4a4a5a, var(--color-bg-control) 60%, var(--color-bg-control-dark));
+    box-shadow: var(--shadow-knob);
+    cursor: ns-resize;
+    position: relative;
+    user-select: none;
+}
+
+.knob::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, var(--color-accent), var(--color-accent-dark));
+    border-radius: 2px;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: center 24px;
+    box-shadow: 0 0 8px var(--color-accent-glow-strong);
+}
+
+.knob-label {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.knob-value {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Switches */
+.switch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.switch {
+    width: 50px;
+    height: 28px;
+    background: linear-gradient(180deg, var(--color-bg-control-dark), var(--color-bg-control));
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+}
+
+.switch::after {
+    content: attr(data-state);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.65rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.switch.active {
+    background: linear-gradient(180deg, #2a4a4a, #1a3a3a);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 10px var(--color-accent-glow);
+}
+
+.switch-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+/* Pickup Selector */
+.pickup-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.pickup-pos {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-bg-control);
+    border: 2px solid var(--color-border-light);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.pickup-pos.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent-glow-strong);
+}
+
+/* ERA Switch */
+.era-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.era-pos {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    background: var(--color-bg-control);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all var(--transition-normal);
+}
+
+.era-pos.active {
+    background: #3a5a5a;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Captor Switch */
+.captor-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.captor-pos {
+    padding: 4px 6px;
+    font-size: 0.6rem;
+    background: var(--color-bg-control);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all var(--transition-normal);
+}
+
+.captor-pos.active {
+    background: #3a5a5a;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+</style>
+    <style>
+/* meters.css - Meter panel components */
+
+/* Fixed Bottom Meter Panel */
+.meter-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--color-border);
+    padding: 12px 20px;
+    z-index: 100;
+    transition: transform var(--transition-slow) ease;
+}
+
+.meter-panel.hidden {
+    transform: translateY(100%);
+}
+
+.meter-panel-content {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    justify-content: center;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding-bottom: 5px;
+}
+
+.meter-panel-content::-webkit-scrollbar {
+    height: 6px;
+}
+
+.meter-panel-content::-webkit-scrollbar-track {
+    background: var(--color-bg-control-dark);
+    border-radius: var(--radius-sm);
+}
+
+.meter-panel-content::-webkit-scrollbar-thumb {
+    background: var(--color-accent);
+    border-radius: var(--radius-sm);
+    opacity: 0.5;
+}
+
+.meter-group {
+    display: flex;
+    gap: 4px;
+}
+
+.meter-divider {
+    width: 2px;
+    background: var(--color-accent);
+    opacity: 0.3;
+    margin: 5px 6px;
+    align-self: stretch;
+}
+
+.meter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 48px;
+    padding: 6px 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-md);
+}
+
+.meter-name {
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    white-space: nowrap;
+}
+
+/* Clip LEDs */
+.clip-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #333;
+    margin-bottom: 3px;
+    transition: all 0.15s;
+}
+
+.clip-led.green {
+    background: var(--color-led-green);
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.6);
+}
+
+.clip-led.yellow {
+    background: var(--color-led-yellow);
+    box-shadow: 0 0 8px rgba(241, 196, 15, 0.6);
+}
+
+.clip-led.orange {
+    background: var(--color-led-orange);
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.6);
+}
+
+.clip-led.red {
+    background: var(--color-led-red);
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+}
+
+/* Meter Bar */
+.meter-bar-container {
+    width: 10px;
+    height: var(--meter-bar-height);
+    background: var(--color-bg-control-dark);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 3px;
+}
+
+.meter-bar {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    background: linear-gradient(0deg, var(--color-led-green), var(--color-led-yellow) 60%, var(--color-led-red) 90%);
+    transition: height var(--transition-fast);
+}
+
+.meter-value {
+    font-size: 0.6rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    font-family: 'Consolas', monospace;
+}
+
+.meter-drive {
+    font-size: 0.5rem;
+    color: var(--color-led-orange);
+    font-family: 'Consolas', monospace;
+    height: 10px;
+}
+
+</style>
+    <style>
+/* summary.css - Summary panel, analysis */
+
+.summary-panel {
+    background: linear-gradient(180deg, #1e2a2a 0%, #162020 100%);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #2a4a4a;
+}
+
+.summary-title {
+    font-size: 1rem;
+    color: var(--color-accent);
+    margin-bottom: 15px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.summary-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.summary-card h4 {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.summary-card .value {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.summary-card .detail {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.tone-recommendation {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: 8px;
+    border-left: 3px solid var(--color-accent);
+}
+
+.tone-recommendation h4 {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    margin-bottom: 6px;
+}
+
+.tone-recommendation p {
+    font-size: 0.8rem;
+    color: #ccc;
+    line-height: 1.5;
+}
+
+.stage-list {
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    margin-top: 10px;
+}
+
+.stage-list .clipping {
+    color: var(--color-led-orange);
+}
+
+.stage-list .clean {
+    color: var(--color-led-green);
+}
+
+</style>
+    <style>
+/* responsive.css - Media queries */
+
+@media (max-width: 768px) {
+    .controls-row {
+        gap: 15px;
+    }
+
+    .knob-container, .knob {
+        width: var(--knob-size-mobile);
+        height: var(--knob-size-mobile);
+    }
+
+    .knob::after {
+        height: 16px;
+        transform-origin: center 20px;
+    }
+
+    .meter-panel {
+        padding: 8px 10px;
+    }
+
+    .meter {
+        min-width: 42px;
+        padding: 4px 3px;
+    }
+
+    .meter-bar-container {
+        height: var(--meter-bar-height-mobile);
+    }
+
+    body {
+        padding-bottom: 120px;
+    }
+}
+
+</style>
+</head>
+<body data-view="amp">
+    <div class="container">
+        <header>
+            <h1>Chupacabra + Klein-ulator Gain Staging Simulator</h1>
+            <p class="subtitle">Ceriatone 100W High-Gain Amplifier with Buffered FX Loop — v5</p>
+        </header>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settings-panel">
+            <h2 class="section-title">Settings</h2>
+            <div class="settings-row">
+                <div class="switch-container">
+                    <div class="view-toggle" id="view-toggle">
+                        <div class="view-option active" data-view="amp">Amp</div>
+                        <div class="view-option" data-view="signal">Signal Flow</div>
+                    </div>
+                    <span class="switch-label">View Mode</span>
+                </div>
+                <div class="switch-container">
+                    <div class="switch active" id="meter-panel-toggle" data-state="ON"></div>
+                    <span class="switch-label">Meter Panel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AMP VIEW SECTIONS -->
+        <div class="amp-view-section">
+            <!-- Guitar Input Section -->
+            <div class="amp-section" id="input-section">
+                <h2 class="section-title">Guitar Input</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="pickup">
+                        <div class="pickup-selector" id="pickup-selector">
+                            <div class="pickup-pos" data-pos="neck" title="Neck"></div>
+                            <div class="pickup-pos" data-pos="middle" title="Middle"></div>
+                            <div class="pickup-pos active" data-pos="bridge" title="Bridge"></div>
+                        </div>
+                        <span class="knob-label">Pickup</span>
+                        <span class="knob-value" id="pickup-value">Bridge</span>
+                    </div>
+                    <div class="control-group" data-stage="guitar-volume">
+                        <div class="knob-container">
+                            <div class="knob" id="guitar-volume" data-value="10" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Guitar Vol</span>
+                        <span class="knob-value" id="guitar-volume-value">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preamp Section (Front Panel) -->
+            <div class="amp-section" id="preamp-section">
+                <h2 class="section-title">Preamp — Chupacabra 100 (Front Panel)</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="gain1">
+                        <div class="knob-container">
+                            <div class="knob" id="gain1" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Gain 1</span>
+                        <span class="knob-value" id="gain1-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="bright1">
+                        <div class="switch" id="bright1" data-state="OFF"></div>
+                        <span class="switch-label">Bright 1</span>
+                    </div>
+                    <div class="control-group" data-stage="gain2">
+                        <div class="knob-container">
+                            <div class="knob" id="gain2" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Gain 2</span>
+                        <span class="knob-value" id="gain2-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="bright2">
+                        <div class="switch" id="bright2" data-state="OFF"></div>
+                        <span class="switch-label">Bright 2</span>
+                    </div>
+                    <div class="switch-container" data-stage="era">
+                        <div class="era-switch" id="era-switch">
+                            <div class="era-pos" data-era="plexi">Plexi</div>
+                            <div class="era-pos active" data-era="80s">'80s</div>
+                            <div class="era-pos" data-era="modern">Modern</div>
+                        </div>
+                        <span class="switch-label">ERA</span>
+                    </div>
+                    <div class="control-group" data-stage="bass">
+                        <div class="knob-container">
+                            <div class="knob" id="bass" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Bass</span>
+                        <span class="knob-value" id="bass-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="middle">
+                        <div class="knob-container">
+                            <div class="knob" id="middle" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Middle</span>
+                        <span class="knob-value" id="middle-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="treble">
+                        <div class="knob-container">
+                            <div class="knob" id="treble" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Treble</span>
+                        <span class="knob-value" id="treble-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FX Loop Section (Klein-ulator) -->
+            <div class="amp-section" id="fxloop-section">
+                <h2 class="section-title">FX Loop — Klein-ulator</h2>
+                <div class="controls-row">
+                    <div class="switch-container" data-stage="loop-bypass">
+                        <div class="switch active" id="loop-bypass" data-state="ON"></div>
+                        <span class="switch-label">Loop</span>
+                    </div>
+                    <div class="control-group" data-stage="send">
+                        <div class="knob-container">
+                            <div class="knob" id="send" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Send</span>
+                        <span class="knob-value" id="send-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="send-bright">
+                        <div class="switch" id="send-bright" data-state="OFF"></div>
+                        <span class="switch-label">Send Bright</span>
+                    </div>
+                    <div class="control-group" data-stage="return">
+                        <div class="knob-container">
+                            <div class="knob" id="return" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Return</span>
+                        <span class="knob-value" id="return-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="return-bright">
+                        <div class="switch" id="return-bright" data-state="OFF"></div>
+                        <span class="switch-label">Ret Bright</span>
+                    </div>
+                    <div class="control-group" data-stage="recovery">
+                        <div class="knob-container">
+                            <div class="knob" id="recovery" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Recovery</span>
+                        <span class="knob-value" id="recovery-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Section (Rear Panel) -->
+            <div class="amp-section" id="power-section">
+                <h2 class="section-title">Power Section — Chupacabra 100 (Rear Panel)</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="master">
+                        <div class="knob-container">
+                            <div class="knob" id="master" data-value="3" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Master</span>
+                        <span class="knob-value" id="master-value">3</span>
+                    </div>
+                    <div class="switch-container" data-stage="focus">
+                        <div class="switch" id="focus" data-state="OFF"></div>
+                        <span class="switch-label">Focus</span>
+                    </div>
+                    <div class="control-group" data-stage="presence">
+                        <div class="knob-container">
+                            <div class="knob" id="presence" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Presence</span>
+                        <span class="knob-value" id="presence-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="resonance">
+                        <div class="knob-container">
+                            <div class="knob" id="resonance" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Resonance</span>
+                        <span class="knob-value" id="resonance-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="pussy-trimmer">
+                        <div class="knob-container">
+                            <div class="knob" id="pussy-trimmer" data-value="10" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Pussy Trim</span>
+                        <span class="knob-value" id="pussy-trimmer-value">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section (Captor X) -->
+            <div class="amp-section" id="output-section">
+                <h2 class="section-title">Output — Captor X</h2>
+                <div class="controls-row">
+                    <div class="switch-container" data-stage="captor">
+                        <div class="captor-switch" id="captor-atten">
+                            <div class="captor-pos active" data-atten="0">0dB</div>
+                            <div class="captor-pos" data-atten="-12">-12dB</div>
+                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                        </div>
+                        <span class="switch-label">Attenuation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIGNAL FLOW VIEW SECTIONS -->
+        <div class="signal-flow-section">
+            <!-- Input Stage -->
+            <div class="amp-section">
+                <h2 class="section-title">Input Stage</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="pickup">
+                        <div class="pickup-selector" id="pickup-selector-sf">
+                            <div class="pickup-pos" data-pos="neck" title="Neck"></div>
+                            <div class="pickup-pos" data-pos="middle" title="Middle"></div>
+                            <div class="pickup-pos active" data-pos="bridge" title="Bridge"></div>
+                        </div>
+                        <span class="knob-label">Pickup</span>
+                        <span class="knob-value" id="pickup-value-sf">Bridge</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group" data-stage="guitar-volume">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                        </div>
+                        <span class="knob-label">Guitar Vol</span>
+                        <span class="knob-value" id="guitar-volume-sf-value">10</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Input">
+                        <span class="indicator-name">Input</span>
+                        <span class="indicator-level" id="sf-level-input">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preamp Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">Preamp Stages</h2>
+                <div class="controls-row">
+                    <div class="stage-indicator" data-stage-id="V1a">
+                        <span class="indicator-name">V1a</span>
+                        <span class="indicator-level" id="sf-level-v1a">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                        </div>
+                        <span class="knob-label">Gain 1</span>
+                        <span class="knob-value" id="gain1-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
+                        <span class="switch-label">Brt 1</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V1b">
+                        <span class="indicator-name">V1b</span>
+                        <span class="indicator-level" id="sf-level-v1b">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                        </div>
+                        <span class="knob-label">Gain 2</span>
+                        <span class="knob-value" id="gain2-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
+                        <span class="switch-label">Brt 2</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V2a">
+                        <span class="indicator-name">V2a</span>
+                        <span class="indicator-level" id="sf-level-v2a">--</span>
+                    </div>
+                </div>
+                <div class="controls-row" style="margin-top: 15px;">
+                    <span class="flow-arrow">→</span>
+                    <div class="switch-container">
+                        <div class="era-switch" id="era-switch-sf">
+                            <div class="era-pos" data-era="plexi">Plexi</div>
+                            <div class="era-pos active" data-era="80s">'80s</div>
+                            <div class="era-pos" data-era="modern">Modern</div>
+                        </div>
+                        <span class="switch-label">ERA</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                        </div>
+                        <span class="knob-label">Bass</span>
+                        <span class="knob-value" id="bass-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
+                        </div>
+                        <span class="knob-label">Mid</span>
+                        <span class="knob-value" id="middle-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
+                        </div>
+                        <span class="knob-label">Treble</span>
+                        <span class="knob-value" id="treble-sf-value">5</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Tonestack">
+                        <span class="indicator-name">Tone</span>
+                        <span class="indicator-level" id="sf-level-tonestack">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V2b">
+                        <span class="indicator-name">V2b</span>
+                        <span class="indicator-level" id="sf-level-v2b">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FX Loop Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">FX Loop — Klein-ulator</h2>
+                <div class="controls-row">
+                    <div class="switch-container">
+                        <div class="switch switch-sf active" id="loop-bypass-sf" data-state="ON" data-mirror="loop-bypass"></div>
+                        <span class="switch-label">Loop</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                        </div>
+                        <span class="knob-label">Send</span>
+                        <span class="knob-value" id="send-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
+                        <span class="switch-label">Brt</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Loop Out">
+                        <span class="indicator-name">Out</span>
+                        <span class="indicator-level" id="sf-level-loopout">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                        </div>
+                        <span class="knob-label">Return</span>
+                        <span class="knob-value" id="return-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
+                        <span class="switch-label">Brt</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
+                        </div>
+                        <span class="knob-label">Recovery</span>
+                        <span class="knob-value" id="recovery-sf-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">Power Section</h2>
+                <div class="controls-row">
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                        </div>
+                        <span class="knob-label">Master</span>
+                        <span class="knob-value" id="master-sf-value">3</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
+                        <span class="switch-label">Focus</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                        </div>
+                        <span class="knob-label">Presence</span>
+                        <span class="knob-value" id="presence-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
+                        </div>
+                        <span class="knob-label">Resonance</span>
+                        <span class="knob-value" id="resonance-sf-value">5</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="PI">
+                        <span class="indicator-name">PI</span>
+                        <span class="indicator-level" id="sf-level-pi">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
+                        </div>
+                        <span class="knob-label">Bias</span>
+                        <span class="knob-value" id="pussy-trimmer-sf-value">10</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Power">
+                        <span class="indicator-name">Power</span>
+                        <span class="indicator-level" id="sf-level-power">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="amp-section">
+                <h2 class="section-title">Output</h2>
+                <div class="controls-row">
+                    <div class="switch-container">
+                        <div class="captor-switch" id="captor-atten-sf">
+                            <div class="captor-pos active" data-atten="0">0dB</div>
+                            <div class="captor-pos" data-atten="-12">-12dB</div>
+                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                        </div>
+                        <span class="switch-label">Captor X</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Captor X">
+                        <span class="indicator-name">Output</span>
+                        <span class="indicator-level" id="sf-level-captor">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Panel -->
+        <div class="summary-panel" id="summary-panel">
+            <h3 class="summary-title">Signal Analysis</h3>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h4>Input Level</h4>
+                    <div class="value" id="summary-input">-6 dBV</div>
+                    <div class="detail" id="summary-input-detail">Bridge humbucker reference</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Preamp Output</h4>
+                    <div class="value" id="summary-preamp">-- dBV</div>
+                    <div class="detail" id="summary-preamp-detail">After V2b</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Speaker Output</h4>
+                    <div class="value" id="summary-output">-- dBV</div>
+                    <div class="detail" id="summary-output-detail">At Captor X</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Gain</h4>
+                    <div class="value" id="summary-gain">-- dB</div>
+                    <div class="detail" id="summary-gain-detail">Input to speaker</div>
+                </div>
+            </div>
+            <div class="tone-recommendation" id="tone-recommendation">
+                <h4>Tone Characteristics</h4>
+                <p id="tone-text">Analyzing signal chain...</p>
+            </div>
+            <div class="stage-list" id="stage-list"></div>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Meter Panel -->
+    <div class="meter-panel" id="meter-panel">
+        <div class="meter-panel-content">
+            <div class="meter-group" data-section="input" id="meter-group-input"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="preamp" id="meter-group-preamp"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="fxloop" id="meter-group-fxloop"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="power" id="meter-group-power"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="output" id="meter-group-output"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript Module -->
+    <script>
+/**
+ * main.js - Application entry point
+ * Gain Staging Simulator v5
+ * Ceriatone Chupacabra 100W + Klein-ulator Buffered FX Loop
+ */
+
+// Config
+// === Inlined from ./config/amp-config.js ===
+/**
+ * amp-config.js - Amplifier configuration constants
+ * Ceriatone Chupacabra 100W + Klein-ulator settings
+ */
+
+/**
+ * Tube stage configurations
+ * Each stage has gain (dB), threshold (dBV), knee (dB), and name
+ */
+const tubeStages = {
+    v1a:   { gain: 35, threshold: 38, knee: 6, name: 'V1a' },
+    v1b:   { gain: 30, threshold: 32, knee: 6, name: 'V1b' },
+    v2a:   { gain: 35, threshold: 38, knee: 6, name: 'V2a' },
+    v2b:   { gain: 30, threshold: 35, knee: 6, name: 'V2b' },
+    pi:    { gain: 20, threshold: 40, knee: 6, name: 'PI' },
+    power: { gain: 26, threshold: 44, knee: 8, name: 'Power' }
+};
+
+/**
+ * ERA switch tonestack loss (dB)
+ * Controls the amount of signal loss through the tonestack
+ */
+const eraLoss = {
+    plexi: -7,
+    '80s': -12,
+    modern: -20
+};
+
+/**
+ * Pickup output levels (dBV)
+ * Reference levels for different pickup positions
+ */
+const pickupLevels = {
+    neck: -10,
+    middle: -8,
+    bridge: -6
+};
+
+/**
+ * Cable loss constant (dB)
+ */
+const cableLoss = 0.5;
+
+/**
+ * Bright switch boost values (dB)
+ */
+const brightBoost = {
+    mid: 1.5,   // Bright 1, Send Bright
+    high: 2.5   // Bright 2, Return Bright
+};
+
+/**
+ * FX Loop recovery compensation (dB at noon)
+ */
+const recoveryCompensation = 2.5;
+
+/**
+ * Meter display constants
+ */
+const meterConfig = {
+    minLevel: -60,  // dBV
+    maxLevel: 50,   // dBV
+    range: 110      // total range for bar calculation
+};
+
+/**
+ * Stage counts per section (for meter strip creation)
+ */
+const stageCounts = {
+    input: 3,
+    preamp: 7,
+    fxloop: 6,
+    power: 6,
+    output: 1
+};
+
+/**
+ * Default state values
+ */
+const defaultState = {
+    pickup: 'bridge',
+    guitarVolume: 10,
+    gain1: 5,
+    bright1: false,
+    gain2: 5,
+    bright2: false,
+    era: '80s',
+    bass: 5,
+    middle: 5,
+    treble: 5,
+    loopEnabled: true,
+    send: 5,
+    sendBright: false,
+    return: 5,
+    returnBright: false,
+    recovery: 5,
+    master: 3,
+    focus: false,
+    presence: 5,
+    resonance: 5,
+    pussyTrimmer: 10,
+    captorAtten: 0,
+    meterPanelVisible: true,
+    viewMode: 'amp'
+};
+
+/**
+ * Combined config export for convenience
+ */
+const AmpConfig = {
+    tubeStages,
+    eraLoss,
+    pickupLevels,
+    cableLoss,
+    brightBoost,
+    recoveryCompensation,
+    meterConfig,
+    stageCounts,
+    defaultState
+};
+
+
+// === End ./config/amp-config.js ===
+
+
+// Core
+// === Inlined from ./core/signal-chain.js ===
+/**
+ * signal-chain.js - Signal chain calculation
+ * Traces signal through all 21+ stages
+ */
+
+// === Inlined from ./gain-math.js ===
+/**
+ * gain-math.js - Pure math functions for gain calculations
+ * All levels in dBV
+ */
+
+/**
+ * Log taper pot simulation
+ * Simulates the response curve of an audio (logarithmic) taper potentiometer
+ * @param {number} value - Pot position (0-10)
+ * @returns {number} Attenuation in dB
+ */
+function logTaper(value) {
+    if (value <= 0) return -60;
+    return 20 * Math.log10(Math.pow(value / 10, 2));
+}
+
+/**
+ * Linear taper pot simulation
+ * Used for certain controls like send/return levels
+ * @param {number} value - Pot position (0-10)
+ * @returns {number} Gain in dB (-10 to +10 range)
+ */
+function linearTaper(value) {
+    return (value / 10) * 20 - 10;
+}
+
+/**
+ * Soft clip function with tanh compression
+ * Models tube saturation behavior
+ * @param {number} level - Input level in dBV
+ * @param {number} threshold - Clipping threshold in dBV
+ * @param {number} knee - Knee width in dB (default 6)
+ * @returns {Object} { clamped: output level, raw: input level, drive: compression amount }
+ */
+function softClip(level, threshold, knee = 6) {
+    const onset = threshold - knee;
+
+    if (level <= onset) {
+        return { clamped: level, raw: level, drive: 0 };
+    }
+
+    const excess = level - onset;
+    const normalized = excess / knee;
+    const compressed = Math.tanh(normalized) * knee;
+    const clamped = onset + compressed;
+    const drive = level - clamped;
+
+    return { clamped, raw: level, drive };
+}
+
+/**
+ * Get clipping state for LED color
+ * @param {number} drive - Amount of compression/drive in dB
+ * @param {number} level - Current level in dBV
+ * @param {number} threshold - Stage threshold in dBV
+ * @returns {string} LED state: 'red', 'orange', 'yellow', 'green', or ''
+ */
+function getClipState(drive, level, threshold) {
+    if (drive > 6) return 'red';
+    if (drive > 3) return 'orange';
+    if (drive > 0.5) return 'yellow';
+    if (level > threshold - 10) return 'green';
+    return '';
+}
+
+/**
+ * Calculate tonestack modification based on EQ settings
+ * @param {number} bass - Bass control (0-10)
+ * @param {number} middle - Middle control (0-10)
+ * @param {number} treble - Treble control (0-10)
+ * @returns {number} Modification in dB
+ */
+function tonestackMod(bass, middle, treble) {
+    return ((bass - 5) + (middle - 5) + (treble - 5)) * 0.3;
+}
+
+/**
+ * Calculate presence/resonance gain modification
+ * @param {number} value - Control value (0-10)
+ * @returns {number} Gain in dB (±3 range)
+ */
+function nfbGain(value) {
+    return (value - 5) * 0.6;
+}
+
+/**
+ * Calculate ERA-modified master taper
+ * @param {number} masterTaper - Base master taper value
+ * @param {string} era - ERA switch position
+ * @returns {number} Modified taper value
+ */
+function eraModifiedTaper(masterTaper, era) {
+    if (era === 'modern') return masterTaper * 1.1;  // Tighter
+    if (era === 'plexi') return masterTaper * 0.9;   // Looser
+    return masterTaper;
+}
+
+/**
+ * Round to one decimal place
+ * @param {number} value
+ * @returns {number}
+ */
+function roundLevel(value) {
+    return Math.round(value * 10) / 10;
+}
+
+/**
+ * Format level for display
+ * @param {number} level - Level in dBV
+ * @param {number} decimals - Number of decimal places (default 1)
+ * @returns {string} Formatted string with sign
+ */
+function formatLevel(level, decimals = 1) {
+    const formatted = level.toFixed(decimals);
+    return level >= 0 ? `+${formatted}` : formatted;
+}
+
+/**
+ * Calculate meter bar height percentage
+ * @param {number} level - Level in dBV
+ * @param {number} minLevel - Minimum display level (default -60)
+ * @param {number} range - Total display range (default 110)
+ * @returns {number} Height percentage (0-100)
+ */
+function meterBarHeight(level, minLevel = -60, range = 110) {
+    return Math.max(0, Math.min(100, ((level - minLevel) / range) * 100));
+}
+
+// === End ./gain-math.js ===
+
+
+/**
+ * Stage data structure
+ * @typedef {Object} Stage
+ * @property {string} name - Stage name
+ * @property {number} level - Output level in dBV
+ * @property {number} gain - Stage gain in dB
+ * @property {number} drive - Compression/drive amount
+ * @property {string} section - Section: 'input', 'preamp', 'fxloop', 'power', 'output'
+ * @property {number|null} threshold - Clipping threshold if tube stage
+ */
+
+/**
+ * Calculate the full signal chain
+ * @param {Object} state - Current application state
+ * @returns {Object} { stages: Stage[], preampOutput: number, finalOutput: number }
+ */
+function calculateSignalChain(state) {
+    const stages = [];
+    const s = state;
+
+    /**
+     * Add a stage to the results
+     */
+    function addStage(name, level, gain, drive, section, threshold = null) {
+        stages.push({
+            name,
+            level: roundLevel(level),
+            gain: roundLevel(gain),
+            drive: roundLevel(drive),
+            section,
+            threshold
+        });
+    }
+
+    // Stage 1: Guitar pickup output
+    let level = pickupLevels[s.pickup];
+    addStage('Pickup', level, 0, 0, 'input');
+
+    // Stage 2: Guitar volume pot
+    const guitarVolAtten = logTaper(s.guitarVolume);
+    level += guitarVolAtten;
+    addStage('Gtr Vol', level, guitarVolAtten, 0, 'input');
+
+    // Stage 3: Input jack (cable loss)
+    level -= cableLoss;
+    addStage('Input', level, -cableLoss, 0, 'input');
+
+    // Stage 4: V1a (first gain stage)
+    const v1a = tubeStages.v1a;
+    level += v1a.gain;
+    let clip = softClip(level, v1a.threshold, v1a.knee);
+    level = clip.clamped;
+    addStage('V1a', level, v1a.gain, clip.drive, 'preamp', v1a.threshold);
+
+    // Stage 5: Gain 1 pot + Bright 1 switch
+    const gain1Atten = logTaper(s.gain1);
+    level += gain1Atten;
+    if (s.bright1) {
+        level += brightBoost.mid;
+    }
+    addStage('Gain 1', level, gain1Atten + (s.bright1 ? brightBoost.mid : 0), 0, 'preamp');
+
+    // Stage 6: V1b (second gain stage)
+    const v1b = tubeStages.v1b;
+    level += v1b.gain;
+    clip = softClip(level, v1b.threshold, v1b.knee);
+    level = clip.clamped;
+    addStage('V1b', level, v1b.gain, clip.drive, 'preamp', v1b.threshold);
+
+    // Stage 7: Gain 2 pot + Bright 2 switch
+    const gain2Atten = logTaper(s.gain2);
+    level += gain2Atten;
+    if (s.bright2) {
+        level += brightBoost.high;
+    }
+    addStage('Gain 2', level, gain2Atten + (s.bright2 ? brightBoost.high : 0), 0, 'preamp');
+
+    // Stage 8: V2a (third gain stage)
+    const v2a = tubeStages.v2a;
+    level += v2a.gain;
+    clip = softClip(level, v2a.threshold, v2a.knee);
+    level = clip.clamped;
+    addStage('V2a', level, v2a.gain, clip.drive, 'preamp', v2a.threshold);
+
+    // Stage 9: Tonestack (ERA-dependent loss)
+    const tonestackLoss = eraLoss[s.era];
+    const toneMod = tonestackMod(s.bass, s.middle, s.treble);
+    const totalToneLoss = tonestackLoss + toneMod;
+    level += totalToneLoss;
+    addStage('Tonestack', level, totalToneLoss, 0, 'preamp');
+
+    // Stage 10: V2b (fourth gain stage / recovery)
+    const v2b = tubeStages.v2b;
+    level += v2b.gain;
+    clip = softClip(level, v2b.threshold, v2b.knee);
+    level = clip.clamped;
+    addStage('V2b', level, v2b.gain, clip.drive, 'preamp', v2b.threshold);
+
+    const preampOutput = level;
+
+    // FX Loop Section (Klein-ulator)
+    if (s.loopEnabled) {
+        // Stage 11: FX Send level
+        const sendLevel = linearTaper(s.send);
+        level += sendLevel;
+        addStage('Send', level, sendLevel, 0, 'fxloop');
+
+        // Stage 12: Send bright switch
+        if (s.sendBright) {
+            level += brightBoost.mid;
+            addStage('Send Brt', level, brightBoost.mid, 0, 'fxloop');
+        }
+
+        // Stage 13: FX Loop out (to pedals) - assume unity gain external
+        addStage('Loop Out', level, 0, 0, 'fxloop');
+
+        // Stage 14: FX Return level
+        const returnLevel = linearTaper(s.return);
+        level += returnLevel;
+        addStage('Return', level, returnLevel, 0, 'fxloop');
+
+        // Stage 15: Return bright switch
+        if (s.returnBright) {
+            level += brightBoost.high;
+            addStage('Ret Brt', level, brightBoost.high, 0, 'fxloop');
+        }
+
+        // Stage 16: Recovery stage (compensation at noon)
+        const recoveryGain = linearTaper(s.recovery) + recoveryCompensation;
+        level += recoveryGain;
+        addStage('Recovery', level, recoveryGain, 0, 'fxloop');
+    }
+
+    // Power Section
+
+    // Stage 17: Master volume
+    let masterTaper = logTaper(s.master);
+    masterTaper = eraModifiedTaper(masterTaper, s.era);
+    level += masterTaper;
+    addStage('Master', level, masterTaper, 0, 'power');
+
+    // Stage 18: Focus switch (slight presence boost)
+    if (s.focus) {
+        level += 1.0;
+        addStage('Focus', level, 1.0, 0, 'power');
+    }
+
+    // Stage 19: Presence - high frequency negative feedback
+    const presenceGain = nfbGain(s.presence);
+    level += presenceGain;
+    addStage('Presence', level, presenceGain, 0, 'power');
+
+    // Stage 20: Resonance - low frequency negative feedback
+    const resonanceGain = nfbGain(s.resonance);
+    level += resonanceGain;
+    addStage('Resonance', level, resonanceGain, 0, 'power');
+
+    // Stage 21: Phase Inverter
+    const pi = tubeStages.pi;
+    level += pi.gain;
+    clip = softClip(level, pi.threshold, pi.knee);
+    level = clip.clamped;
+    addStage('PI', level, pi.gain, clip.drive, 'power', pi.threshold);
+
+    // Stage 22: Power tubes (4×EL34)
+    const power = tubeStages.power;
+    const pussyMod = (s.pussyTrimmer - 10) * 0.2;
+    level += power.gain + pussyMod;
+    clip = softClip(level, power.threshold, power.knee);
+    level = clip.clamped;
+    addStage('Power', level, power.gain + pussyMod, clip.drive, 'power', power.threshold);
+
+    // Stage 23: Captor X output
+    level += s.captorAtten;
+    addStage('Captor X', level, s.captorAtten, 0, 'output');
+
+    return {
+        stages,
+        preampOutput,
+        finalOutput: level
+    };
+}
+
+/**
+ * Get stages for a specific section
+ * @param {Stage[]} stages - All stages
+ * @param {string} section - Section name
+ * @returns {Stage[]} Filtered stages
+ */
+function getStagesBySection(stages, section) {
+    return stages.filter(s => s.section === section);
+}
+
+/**
+ * Get all clipping stages
+ * @param {Stage[]} stages - All stages
+ * @returns {Stage[]} Stages with drive > 0
+ */
+function getClippingStages(stages) {
+    return stages.filter(s => s.drive > 0);
+}
+
+/**
+ * Get heavily clipping stages
+ * @param {Stage[]} stages - All stages
+ * @returns {Stage[]} Stages with drive > 3
+ */
+function getHeavyClippingStages(stages) {
+    return stages.filter(s => s.drive > 3);
+}
+
+/**
+ * Find a stage by name
+ * @param {Stage[]} stages - All stages
+ * @param {string} name - Stage name
+ * @returns {Stage|undefined}
+ */
+function findStage(stages, name) {
+    return stages.find(s => s.name === name);
+}
+
+
+// === End ./core/signal-chain.js ===
+
+
+// UI
+// === Inlined from ./ui/meters.js ===
+/**
+ * meters.js - Meter panel rendering
+ */
+
+
+/**
+ * Create meter strip elements in the DOM
+ * @param {Object} containers - Map of section names to container elements
+ */
+function createMeterStrips(containers) {
+    // Clear existing
+    Object.values(containers).forEach(el => {
+        if (el) el.innerHTML = '';
+    });
+
+    // Create placeholder meters based on max possible stages
+    Object.entries(stageCounts).forEach(([section, count]) => {
+        const container = containers[section];
+        if (!container) return;
+
+        for (let i = 0; i < count; i++) {
+            const meter = document.createElement('div');
+            meter.className = 'meter';
+            meter.dataset.section = section;
+            meter.dataset.index = i;
+            meter.innerHTML = `
+                <span class="meter-name">--</span>
+                <div class="clip-led"></div>
+                <div class="meter-bar-container">
+                    <div class="meter-bar" style="height: 0%"></div>
+                </div>
+                <span class="meter-value">--</span>
+                <span class="meter-drive"></span>
+            `;
+            container.appendChild(meter);
+        }
+    });
+}
+
+/**
+ * Get meter container elements by ID
+ * @returns {Object} Map of section names to container elements
+ */
+function getMeterContainers() {
+    return {
+        input: document.getElementById('meter-group-input'),
+        preamp: document.getElementById('meter-group-preamp'),
+        fxloop: document.getElementById('meter-group-fxloop'),
+        power: document.getElementById('meter-group-power'),
+        output: document.getElementById('meter-group-output')
+    };
+}
+
+/**
+ * Update all meter displays
+ * @param {Stage[]} stages - Calculated stage results
+ */
+function updateMeters(stages) {
+    const sections = ['input', 'preamp', 'fxloop', 'power', 'output'];
+
+    sections.forEach(section => {
+        const container = document.getElementById(`meter-group-${section}`);
+        if (!container) return;
+
+        const meters = container.querySelectorAll('.meter');
+        const sectionStages = getStagesBySection(stages, section);
+
+        meters.forEach((meter, i) => {
+            if (i < sectionStages.length) {
+                const stage = sectionStages[i];
+                meter.style.display = 'flex';
+
+                // Update name
+                meter.querySelector('.meter-name').textContent = stage.name;
+
+                // Update LED
+                const led = meter.querySelector('.clip-led');
+                led.className = 'clip-led';
+                const clipState = getClipState(stage.drive, stage.level, stage.threshold || 50);
+                if (clipState) led.classList.add(clipState);
+
+                // Update bar
+                const barHeight = meterBarHeight(stage.level);
+                meter.querySelector('.meter-bar').style.height = `${barHeight}%`;
+
+                // Update value
+                meter.querySelector('.meter-value').textContent = formatLevel(stage.level, 1);
+
+                // Update drive indicator
+                const driveEl = meter.querySelector('.meter-drive');
+                driveEl.textContent = stage.drive > 0 ? `▲${stage.drive.toFixed(1)}` : '';
+            } else {
+                meter.style.display = 'none';
+            }
+        });
+    });
+}
+
+/**
+ * Initialize meter panel with containers
+ */
+function initMeters() {
+    const containers = getMeterContainers();
+    createMeterStrips(containers);
+}
+
+    createMeterStrips,
+    getMeterContainers,
+    updateMeters,
+    initMeters
+};
+
+// === End ./ui/meters.js ===
+
+// === Inlined from ./ui/summary.js ===
+/**
+ * summary.js - Summary panel and tone recommendation
+ */
+
+
+/**
+ * Update summary panel display
+ * @param {Stage[]} stages - All calculated stages
+ * @param {number} preampOutput - Level after preamp (dBV)
+ * @param {number} finalOutput - Final output level (dBV)
+ * @param {Object} state - Current application state
+ */
+function updateSummary(stages, preampOutput, finalOutput, state) {
+    const inputLevel = stages[0]?.level || -6;
+    const totalGain = finalOutput - inputLevel;
+
+    // Input level
+    const inputEl = document.getElementById('summary-input');
+    const inputDetailEl = document.getElementById('summary-input-detail');
+    if (inputEl) {
+        inputEl.textContent = `${formatLevel(inputLevel, 1)} dBV`;
+    }
+    if (inputDetailEl) {
+        inputDetailEl.textContent = `${capitalize(state.pickup)} pickup`;
+    }
+
+    // Preamp output
+    const preampEl = document.getElementById('summary-preamp');
+    if (preampEl) {
+        preampEl.textContent = `${formatLevel(preampOutput, 1)} dBV`;
+    }
+
+    // Final output
+    const outputEl = document.getElementById('summary-output');
+    if (outputEl) {
+        outputEl.textContent = `${formatLevel(finalOutput, 1)} dBV`;
+    }
+
+    // Total gain
+    const gainEl = document.getElementById('summary-gain');
+    if (gainEl) {
+        gainEl.textContent = `${formatLevel(totalGain, 1)} dB`;
+    }
+
+    // Generate tone recommendation
+    generateToneRecommendation(stages, state);
+
+    // Generate stage list
+    generateStageList(stages);
+}
+
+/**
+ * Generate tone recommendation text
+ * @param {Stage[]} stages - All calculated stages
+ * @param {Object} state - Current application state
+ */
+function generateToneRecommendation(stages, state) {
+    const s = state;
+    const clippingStages = getClippingStages(stages);
+    const heavyClipping = getHeavyClippingStages(stages);
+
+    let tone = '';
+
+    if (clippingStages.length === 0) {
+        tone = 'Clean signal path — no tube saturation. Increase gain controls for preamp distortion.';
+    } else if (heavyClipping.length > 3) {
+        tone = `Heavily saturated tone with ${heavyClipping.length} stages in hard clipping. `;
+        tone += 'Expect compressed dynamics and thick distortion. ';
+        if (s.era === 'modern') tone += 'Modern voicing adds tight low-end definition.';
+        else if (s.era === 'plexi') tone += 'Plexi voicing provides open, dynamic response.';
+        else tone += "'80s voicing balances crunch with clarity.";
+    } else if (clippingStages.length > 0) {
+        tone = `${clippingStages.length} stage(s) in soft clipping — `;
+
+        const preampClipping = clippingStages.filter(st =>
+            ['V1a', 'V1b', 'V2a', 'V2b'].includes(st.name));
+        const powerClipping = clippingStages.filter(st =>
+            ['PI', 'Power'].includes(st.name));
+
+        if (preampClipping.length > 0 && powerClipping.length > 0) {
+            tone += 'blend of preamp grit and power section compression. Classic high-gain tone.';
+        } else if (preampClipping.length > 0) {
+            tone += 'preamp-driven distortion with clean power section. Tight and articulate.';
+        } else {
+            tone += 'power section breakup with clean preamp. Fat, dynamic crunch.';
+        }
+    }
+
+    // Add presence/resonance info
+    if (s.presence !== 5 || s.resonance !== 5) {
+        tone += ` NFB shaping: `;
+        if (s.presence > 5) tone += 'boosted highs';
+        else if (s.presence < 5) tone += 'reduced highs';
+        if (s.presence !== 5 && s.resonance !== 5) tone += ', ';
+        if (s.resonance > 5) tone += 'boosted lows';
+        else if (s.resonance < 5) tone += 'reduced lows';
+        tone += '.';
+    }
+
+    if (s.loopEnabled && (s.sendBright || s.returnBright)) {
+        tone += ' FX loop bright switches add presence to the signal.';
+    }
+
+    if (s.bright1 || s.bright2) {
+        tone += ' Preamp bright switches engaged for added sparkle.';
+    }
+
+    const toneTextEl = document.getElementById('tone-text');
+    if (toneTextEl) {
+        toneTextEl.textContent = tone;
+    }
+}
+
+/**
+ * Generate stage list HTML
+ * @param {Stage[]} stages - All calculated stages
+ */
+function generateStageList(stages) {
+    const listEl = document.getElementById('stage-list');
+    if (!listEl) return;
+
+    let html = '<strong>Signal Path:</strong> ';
+
+    html += stages.map(s => {
+        const levelStr = formatLevel(s.level, 0);
+        if (s.drive > 3) {
+            return `<span class="clipping">${s.name}(${levelStr}▲${s.drive.toFixed(0)})</span>`;
+        } else if (s.drive > 0) {
+            return `<span class="clipping">${s.name}(${levelStr})</span>`;
+        }
+        return `<span class="clean">${s.name}(${levelStr})</span>`;
+    }).join(' → ');
+
+    listEl.innerHTML = html;
+}
+
+/**
+ * Capitalize first letter
+ * @param {string} str
+ * @returns {string}
+ */
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+    updateSummary,
+    generateToneRecommendation,
+    generateStageList
+};
+
+// === End ./ui/summary.js ===
+
+// === Inlined from ./ui/signal-flow.js ===
+/**
+ * signal-flow.js - Signal flow view indicators
+ */
+
+
+/**
+ * Map of stage names to signal flow indicator element IDs
+ */
+const stageElementMap = {
+    'Input': 'sf-level-input',
+    'V1a': 'sf-level-v1a',
+    'V1b': 'sf-level-v1b',
+    'V2a': 'sf-level-v2a',
+    'Tonestack': 'sf-level-tonestack',
+    'V2b': 'sf-level-v2b',
+    'Loop Out': 'sf-level-loopout',
+    'PI': 'sf-level-pi',
+    'Power': 'sf-level-power',
+    'Captor X': 'sf-level-captor'
+};
+
+/**
+ * Update signal flow view stage indicators
+ * @param {Stage[]} stages - Calculated stage results
+ */
+function updateSignalFlowIndicators(stages) {
+    stages.forEach(stage => {
+        const elId = stageElementMap[stage.name];
+        if (elId) {
+            const el = document.getElementById(elId);
+            if (el) {
+                el.textContent = formatLevel(stage.level, 0);
+            }
+        }
+    });
+}
+
+/**
+ * Get indicator element for a stage
+ * @param {string} stageName - Stage name
+ * @returns {HTMLElement|null}
+ */
+function getIndicatorElement(stageName) {
+    const elId = stageElementMap[stageName];
+    return elId ? document.getElementById(elId) : null;
+}
+
+/**
+ * Clear all signal flow indicators
+ */
+function clearSignalFlowIndicators() {
+    Object.values(stageElementMap).forEach(elId => {
+        const el = document.getElementById(elId);
+        if (el) {
+            el.textContent = '--';
+        }
+    });
+}
+
+    updateSignalFlowIndicators,
+    getIndicatorElement,
+    clearSignalFlowIndicators,
+    stageElementMap
+};
+
+// === End ./ui/signal-flow.js ===
+
+
+// Controls
+// === Inlined from ./controls/knobs.js ===
+/**
+ * knobs.js - Knob interaction handling
+ */
+
+// === Inlined from ../core/state.js ===
+/**
+ * state.js - Application state management
+ */
+
+
+/**
+ * Create a fresh copy of the default state
+ * @returns {Object} New state object
+ */
+function createInitialState() {
+    return { ...defaultState };
+}
+
+/**
+ * State manager class
+ * Provides controlled access to application state with change notification
+ */
+class StateManager {
+    constructor(initialState = null) {
+        this._state = initialState || createInitialState();
+        this._listeners = [];
+    }
+
+    /**
+     * Get current state (read-only copy)
+     */
+    get state() {
+        return { ...this._state };
+    }
+
+    /**
+     * Get a specific state value
+     * @param {string} key - State key
+     * @returns {*} State value
+     */
+    get(key) {
+        return this._state[key];
+    }
+
+    /**
+     * Set a state value
+     * @param {string} key - State key
+     * @param {*} value - New value
+     */
+    set(key, value) {
+        const oldValue = this._state[key];
+        if (oldValue !== value) {
+            this._state[key] = value;
+            this._notifyListeners(key, value, oldValue);
+        }
+    }
+
+    /**
+     * Update multiple state values at once
+     * @param {Object} updates - Key-value pairs to update
+     */
+    update(updates) {
+        Object.entries(updates).forEach(([key, value]) => {
+            this.set(key, value);
+        });
+    }
+
+    /**
+     * Toggle a boolean state value
+     * @param {string} key - State key
+     * @returns {boolean} New value
+     */
+    toggle(key) {
+        const newValue = !this._state[key];
+        this.set(key, newValue);
+        return newValue;
+    }
+
+    /**
+     * Reset state to defaults
+     */
+    reset() {
+        this._state = createInitialState();
+        this._notifyListeners('*', this._state, null);
+    }
+
+    /**
+     * Subscribe to state changes
+     * @param {Function} listener - Callback function(key, newValue, oldValue)
+     * @returns {Function} Unsubscribe function
+     */
+    subscribe(listener) {
+        this._listeners.push(listener);
+        return () => {
+            const index = this._listeners.indexOf(listener);
+            if (index > -1) {
+                this._listeners.splice(index, 1);
+            }
+        };
+    }
+
+    /**
+     * Notify all listeners of a state change
+     * @private
+     */
+    _notifyListeners(key, newValue, oldValue) {
+        this._listeners.forEach(listener => {
+            try {
+                listener(key, newValue, oldValue);
+            } catch (e) {
+                console.error('State listener error:', e);
+            }
+        });
+    }
+}
+
+/**
+ * Map control IDs to state keys
+ * Handles kebab-case to camelCase conversion
+ */
+const controlToStateKey = {
+    'guitar-volume': 'guitarVolume',
+    'pussy-trimmer': 'pussyTrimmer',
+    'loop-bypass': 'loopEnabled',
+    'send-bright': 'sendBright',
+    'return-bright': 'returnBright',
+    'gain1': 'gain1',
+    'gain2': 'gain2',
+    'bright1': 'bright1',
+    'bright2': 'bright2',
+    'send': 'send',
+    'return': 'return',
+    'recovery': 'recovery',
+    'master': 'master',
+    'focus': 'focus',
+    'presence': 'presence',
+    'resonance': 'resonance',
+    'bass': 'bass',
+    'middle': 'middle',
+    'treble': 'treble'
+};
+
+/**
+ * Get state key from control ID
+ * @param {string} controlId - DOM element ID
+ * @returns {string} State key
+ */
+function getStateKey(controlId) {
+    // Remove -sf suffix for signal flow controls
+    const baseId = controlId.replace(/-sf$/, '');
+
+    // Check explicit mapping first
+    if (controlToStateKey[baseId]) {
+        return controlToStateKey[baseId];
+    }
+
+    // Convert kebab-case to camelCase
+    return baseId.replace(/-([a-z])/g, (m, c) => c.toUpperCase());
+}
+
+
+// === End ../core/state.js ===
+
+
+/**
+ * Setup knob controls
+ * @param {Function} onUpdate - Callback when knob value changes
+ * @returns {Function} Cleanup function
+ */
+function setupKnobs(onUpdate) {
+    const knobs = document.querySelectorAll('.knob');
+    const cleanupFns = [];
+
+    knobs.forEach(knob => {
+        let isDragging = false;
+        let startY, startValue;
+
+        const updateKnob = (value, fromMirror = false) => {
+            const min = parseFloat(knob.dataset.min);
+            const max = parseFloat(knob.dataset.max);
+            value = Math.max(min, Math.min(max, value));
+            knob.dataset.value = value;
+
+            // Rotate indicator (-135° to 135° for 0-10)
+            const rotation = -135 + (value / max) * 270;
+            knob.style.setProperty('--knob-rotation', `${rotation}deg`);
+
+            // Update display value
+            const valueEl = document.getElementById(`${knob.id}-value`);
+            if (valueEl) valueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
+
+            // Mirror to paired control
+            if (!fromMirror && knob.dataset.mirror) {
+                const mirrorKnob = document.getElementById(knob.dataset.mirror);
+                if (mirrorKnob) {
+                    mirrorKnob.dataset.value = value;
+                    const mirrorRotation = -135 + (value / max) * 270;
+                    mirrorKnob.style.setProperty('--knob-rotation', `${mirrorRotation}deg`);
+                    const mirrorValueEl = document.getElementById(`${knob.dataset.mirror}-value`);
+                    if (mirrorValueEl) mirrorValueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
+                }
+            } else if (!fromMirror) {
+                // Check if this is the main control and update SF version
+                const sfKnob = document.getElementById(`${knob.id}-sf`);
+                if (sfKnob) {
+                    sfKnob.dataset.value = value;
+                    const sfRotation = -135 + (value / max) * 270;
+                    sfKnob.style.setProperty('--knob-rotation', `${sfRotation}deg`);
+                    const sfValueEl = document.getElementById(`${knob.id}-sf-value`);
+                    if (sfValueEl) sfValueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
+                }
+            }
+
+            // Notify state change
+            const stateKey = getStateKey(knob.id);
+            onUpdate(stateKey, value);
+        };
+
+        // Set initial rotation
+        const initialValue = parseFloat(knob.dataset.value);
+        const max = parseFloat(knob.dataset.max);
+        const rotation = -135 + (initialValue / max) * 270;
+        knob.style.setProperty('--knob-rotation', `${rotation}deg`);
+
+        const handleMouseDown = (e) => {
+            isDragging = true;
+            startY = e.clientY;
+            startValue = parseFloat(knob.dataset.value);
+            e.preventDefault();
+        };
+
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            const deltaY = startY - e.clientY;
+            const sensitivity = 0.05;
+            const newValue = startValue + deltaY * sensitivity;
+            updateKnob(newValue);
+        };
+
+        const handleMouseUp = () => {
+            isDragging = false;
+        };
+
+        const handleDoubleClick = () => {
+            updateKnob(5);
+        };
+
+        knob.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        knob.addEventListener('dblclick', handleDoubleClick);
+
+        cleanupFns.push(() => {
+            knob.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            knob.removeEventListener('dblclick', handleDoubleClick);
+        });
+    });
+
+    // Add CSS for knob rotation
+    addKnobStyles();
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Add knob rotation CSS
+ */
+function addKnobStyles() {
+    if (document.getElementById('knob-rotation-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'knob-rotation-styles';
+    style.textContent = `
+        .knob::after {
+            transform: translateX(-50%) rotate(var(--knob-rotation, 0deg));
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+/**
+ * Set knob value programmatically
+ * @param {string} knobId - Knob element ID
+ * @param {number} value - New value
+ */
+function setKnobValue(knobId, value) {
+    const knob = document.getElementById(knobId);
+    if (!knob) return;
+
+    const max = parseFloat(knob.dataset.max);
+    knob.dataset.value = value;
+    const rotation = -135 + (value / max) * 270;
+    knob.style.setProperty('--knob-rotation', `${rotation}deg`);
+
+    const valueEl = document.getElementById(`${knobId}-value`);
+    if (valueEl) valueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
+}
+
+    setupKnobs,
+    setKnobValue
+};
+
+// === End ./controls/knobs.js ===
+
+// === Inlined from ./controls/switches.js ===
+/**
+ * switches.js - Switch control handling
+ */
+
+/**
+ * Switch configuration
+ * Maps switch IDs to their state keys
+ */
+const switchConfig = {
+    'loop-bypass': { stateKey: 'loopEnabled', default: true },
+    'send-bright': { stateKey: 'sendBright', default: false },
+    'return-bright': { stateKey: 'returnBright', default: false },
+    'focus': { stateKey: 'focus', default: false },
+    'bright1': { stateKey: 'bright1', default: false },
+    'bright2': { stateKey: 'bright2', default: false }
+};
+
+/**
+ * Setup switch controls
+ * @param {Function} onUpdate - Callback when switch state changes
+ * @returns {Function} Cleanup function
+ */
+function setupSwitches(onUpdate) {
+    const cleanupFns = [];
+
+    // Setup main switches
+    Object.entries(switchConfig).forEach(([id, config]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        // Set initial state
+        if (config.default) {
+            el.classList.add('active');
+            el.dataset.state = 'ON';
+        }
+
+        const handleClick = () => {
+            const currentState = el.classList.contains('active');
+            const newState = !currentState;
+
+            // Sync both main and SF versions
+            syncSwitch(id, newState);
+
+            // Notify state change
+            onUpdate(config.stateKey, newState);
+        };
+
+        el.addEventListener('click', handleClick);
+        cleanupFns.push(() => el.removeEventListener('click', handleClick));
+    });
+
+    // Setup mirrored SF switches
+    document.querySelectorAll('.switch-sf').forEach(sw => {
+        const mirrorId = sw.dataset.mirror;
+        if (!mirrorId || !switchConfig[mirrorId]) return;
+
+        const config = switchConfig[mirrorId];
+
+        const handleClick = () => {
+            const mainEl = document.getElementById(mirrorId);
+            if (!mainEl) return;
+
+            const currentState = mainEl.classList.contains('active');
+            const newState = !currentState;
+
+            // Sync both versions
+            syncSwitch(mirrorId, newState);
+
+            // Notify state change
+            onUpdate(config.stateKey, newState);
+        };
+
+        sw.addEventListener('click', handleClick);
+        cleanupFns.push(() => sw.removeEventListener('click', handleClick));
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Sync switch state between main and SF versions
+ * @param {string} baseId - Base switch ID (without -sf)
+ * @param {boolean} state - New state
+ */
+function syncSwitch(baseId, state) {
+    const mainEl = document.getElementById(baseId);
+    const sfEl = document.getElementById(`${baseId}-sf`);
+
+    [mainEl, sfEl].forEach(el => {
+        if (el) {
+            el.dataset.state = state ? 'ON' : 'OFF';
+            el.classList.toggle('active', state);
+        }
+    });
+}
+
+/**
+ * Get current switch state
+ * @param {string} id - Switch ID
+ * @returns {boolean} Current state
+ */
+function getSwitchState(id) {
+    const el = document.getElementById(id);
+    return el ? el.classList.contains('active') : false;
+}
+
+/**
+ * Set switch state programmatically
+ * @param {string} id - Switch ID
+ * @param {boolean} state - New state
+ */
+function setSwitchState(id, state) {
+    syncSwitch(id, state);
+}
+
+    setupSwitches,
+    syncSwitch,
+    getSwitchState,
+    setSwitchState,
+    switchConfig
+};
+
+// === End ./controls/switches.js ===
+
+// === Inlined from ./controls/selectors.js ===
+/**
+ * selectors.js - Pickup, ERA, and Captor selector handling
+ */
+
+/**
+ * Setup pickup selector
+ * @param {Function} onUpdate - Callback when pickup changes
+ * @returns {Function} Cleanup function
+ */
+function setupPickupSelector(onUpdate) {
+    const cleanupFns = [];
+
+    // Setup both AMP and SF pickup selectors
+    ['pickup-selector', 'pickup-selector-sf'].forEach(selectorId => {
+        const selector = document.getElementById(selectorId);
+        if (!selector) return;
+
+        const positions = selector.querySelectorAll('.pickup-pos');
+
+        positions.forEach(pos => {
+            const handleClick = () => {
+                // Update all pickup selectors
+                document.querySelectorAll('.pickup-selector .pickup-pos').forEach(p =>
+                    p.classList.remove('active'));
+                document.querySelectorAll(`.pickup-pos[data-pos="${pos.dataset.pos}"]`).forEach(p =>
+                    p.classList.add('active'));
+
+                const pickup = pos.dataset.pos;
+                const label = capitalize(pickup);
+
+                // Update labels
+                const mainLabel = document.getElementById('pickup-value');
+                const sfLabel = document.getElementById('pickup-value-sf');
+                if (mainLabel) mainLabel.textContent = label;
+                if (sfLabel) sfLabel.textContent = label;
+
+                onUpdate('pickup', pickup);
+            };
+
+            pos.addEventListener('click', handleClick);
+            cleanupFns.push(() => pos.removeEventListener('click', handleClick));
+        });
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Setup ERA switches
+ * @param {Function} onUpdate - Callback when ERA changes
+ * @returns {Function} Cleanup function
+ */
+function setupEraSwitches(onUpdate) {
+    const cleanupFns = [];
+
+    // Setup both AMP and SF era switches
+    ['era-switch', 'era-switch-sf'].forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const positions = container.querySelectorAll('.era-pos');
+
+        positions.forEach(pos => {
+            const handleClick = () => {
+                // Update all era switches
+                document.querySelectorAll('.era-switch .era-pos').forEach(p =>
+                    p.classList.remove('active'));
+                document.querySelectorAll(`.era-pos[data-era="${pos.dataset.era}"]`).forEach(p =>
+                    p.classList.add('active'));
+
+                onUpdate('era', pos.dataset.era);
+            };
+
+            pos.addEventListener('click', handleClick);
+            cleanupFns.push(() => pos.removeEventListener('click', handleClick));
+        });
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Setup Captor X attenuation switches
+ * @param {Function} onUpdate - Callback when attenuation changes
+ * @returns {Function} Cleanup function
+ */
+function setupCaptorSwitches(onUpdate) {
+    const cleanupFns = [];
+
+    // Setup both AMP and SF captor switches
+    ['captor-atten', 'captor-atten-sf'].forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const positions = container.querySelectorAll('.captor-pos');
+
+        positions.forEach(pos => {
+            const handleClick = () => {
+                // Update all captor switches
+                document.querySelectorAll('.captor-switch .captor-pos').forEach(p =>
+                    p.classList.remove('active'));
+                document.querySelectorAll(`.captor-pos[data-atten="${pos.dataset.atten}"]`).forEach(p =>
+                    p.classList.add('active'));
+
+                onUpdate('captorAtten', parseFloat(pos.dataset.atten));
+            };
+
+            pos.addEventListener('click', handleClick);
+            cleanupFns.push(() => pos.removeEventListener('click', handleClick));
+        });
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Set pickup selection programmatically
+ * @param {string} pickup - 'neck', 'middle', or 'bridge'
+ */
+function setPickup(pickup) {
+    document.querySelectorAll('.pickup-selector .pickup-pos').forEach(p =>
+        p.classList.remove('active'));
+    document.querySelectorAll(`.pickup-pos[data-pos="${pickup}"]`).forEach(p =>
+        p.classList.add('active'));
+
+    const label = capitalize(pickup);
+    const mainLabel = document.getElementById('pickup-value');
+    const sfLabel = document.getElementById('pickup-value-sf');
+    if (mainLabel) mainLabel.textContent = label;
+    if (sfLabel) sfLabel.textContent = label;
+}
+
+/**
+ * Set ERA selection programmatically
+ * @param {string} era - 'plexi', '80s', or 'modern'
+ */
+function setEra(era) {
+    document.querySelectorAll('.era-switch .era-pos').forEach(p =>
+        p.classList.remove('active'));
+    document.querySelectorAll(`.era-pos[data-era="${era}"]`).forEach(p =>
+        p.classList.add('active'));
+}
+
+/**
+ * Set Captor attenuation programmatically
+ * @param {number} atten - 0, -12, or -38
+ */
+function setCaptorAtten(atten) {
+    document.querySelectorAll('.captor-switch .captor-pos').forEach(p =>
+        p.classList.remove('active'));
+    document.querySelectorAll(`.captor-pos[data-atten="${atten}"]`).forEach(p =>
+        p.classList.add('active'));
+}
+
+/**
+ * Capitalize first letter
+ * @param {string} str
+ * @returns {string}
+ */
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+    setupPickupSelector,
+    setupEraSwitches,
+    setupCaptorSwitches,
+    setPickup,
+    setEra,
+    setCaptorAtten
+};
+
+// === End ./controls/selectors.js ===
+
+// === Inlined from ./controls/view-toggle.js ===
+/**
+ * view-toggle.js - View mode and meter panel toggle handling
+ */
+
+/**
+ * Setup view mode toggle
+ * @param {Function} onUpdate - Callback when view mode changes
+ * @returns {Function} Cleanup function
+ */
+function setupViewToggle(onUpdate) {
+    const toggle = document.getElementById('view-toggle');
+    if (!toggle) return () => {};
+
+    const options = toggle.querySelectorAll('.view-option');
+    const cleanupFns = [];
+
+    options.forEach(opt => {
+        const handleClick = () => {
+            options.forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+
+            const viewMode = opt.dataset.view;
+            document.body.dataset.view = viewMode;
+
+            onUpdate('viewMode', viewMode);
+        };
+
+        opt.addEventListener('click', handleClick);
+        cleanupFns.push(() => opt.removeEventListener('click', handleClick));
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Setup meter panel toggle
+ * @param {Function} onUpdate - Callback when panel visibility changes
+ * @returns {Function} Cleanup function
+ */
+function setupMeterPanelToggle(onUpdate) {
+    const toggle = document.getElementById('meter-panel-toggle');
+    const panel = document.getElementById('meter-panel');
+
+    if (!toggle || !panel) return () => {};
+
+    const handleClick = () => {
+        const isVisible = toggle.classList.contains('active');
+        const newVisibility = !isVisible;
+
+        toggle.dataset.state = newVisibility ? 'ON' : 'OFF';
+        toggle.classList.toggle('active', newVisibility);
+        panel.classList.toggle('hidden', !newVisibility);
+        document.body.classList.toggle('meter-panel-hidden', !newVisibility);
+
+        onUpdate('meterPanelVisible', newVisibility);
+    };
+
+    toggle.addEventListener('click', handleClick);
+
+    return () => toggle.removeEventListener('click', handleClick);
+}
+
+/**
+ * Set view mode programmatically
+ * @param {string} mode - 'amp' or 'signal'
+ */
+function setViewMode(mode) {
+    const toggle = document.getElementById('view-toggle');
+    if (!toggle) return;
+
+    const options = toggle.querySelectorAll('.view-option');
+    options.forEach(o => o.classList.remove('active'));
+
+    const targetOption = toggle.querySelector(`.view-option[data-view="${mode}"]`);
+    if (targetOption) {
+        targetOption.classList.add('active');
+    }
+
+    document.body.dataset.view = mode;
+}
+
+/**
+ * Set meter panel visibility programmatically
+ * @param {boolean} visible - Whether panel should be visible
+ */
+function setMeterPanelVisible(visible) {
+    const toggle = document.getElementById('meter-panel-toggle');
+    const panel = document.getElementById('meter-panel');
+
+    if (toggle) {
+        toggle.dataset.state = visible ? 'ON' : 'OFF';
+        toggle.classList.toggle('active', visible);
+    }
+
+    if (panel) {
+        panel.classList.toggle('hidden', !visible);
+    }
+
+    document.body.classList.toggle('meter-panel-hidden', !visible);
+}
+
+/**
+ * Get current view mode
+ * @returns {string} 'amp' or 'signal'
+ */
+function getViewMode() {
+    return document.body.dataset.view || 'amp';
+}
+
+/**
+ * Get meter panel visibility
+ * @returns {boolean}
+ */
+function isMeterPanelVisible() {
+    const toggle = document.getElementById('meter-panel-toggle');
+    return toggle ? toggle.classList.contains('active') : true;
+}
+
+    setupViewToggle,
+    setupMeterPanelToggle,
+    setViewMode,
+    setMeterPanelVisible,
+    getViewMode,
+    isMeterPanelVisible
+};
+
+// === End ./controls/view-toggle.js ===
+
+
+/**
+ * GainStagingSimulator class
+ * Main application controller
+ */
+class GainStagingSimulator {
+    constructor() {
+        // Initialize state from defaults
+        this.state = { ...defaultState };
+
+        // Stage results storage
+        this.stages = [];
+
+        // Debounce timer
+        this.updateTimer = null;
+
+        // Cleanup functions for event listeners
+        this.cleanupFns = [];
+
+        this.init();
+    }
+
+    /**
+     * Initialize the simulator
+     */
+    init() {
+        // Setup controls with state update callback
+        const onStateUpdate = (key, value) => {
+            this.state[key] = value;
+            this.scheduleUpdate();
+        };
+
+        // Setup all control handlers
+        this.cleanupFns.push(setupKnobs(onStateUpdate));
+        this.cleanupFns.push(setupSwitches(onStateUpdate));
+        this.cleanupFns.push(setupPickupSelector(onStateUpdate));
+        this.cleanupFns.push(setupEraSwitches(onStateUpdate));
+        this.cleanupFns.push(setupCaptorSwitches(onStateUpdate));
+        this.cleanupFns.push(setupViewToggle(onStateUpdate));
+        this.cleanupFns.push(setupMeterPanelToggle(onStateUpdate));
+
+        // Initialize meter strips
+        initMeters();
+
+        // Initial calculation
+        this.calculate();
+    }
+
+    /**
+     * Schedule a debounced update
+     */
+    scheduleUpdate() {
+        if (this.updateTimer) clearTimeout(this.updateTimer);
+        this.updateTimer = setTimeout(() => this.calculate(), 50);
+    }
+
+    /**
+     * Calculate signal chain and update UI
+     */
+    calculate() {
+        // Calculate signal chain
+        const result = calculateSignalChain(this.state);
+        this.stages = result.stages;
+
+        // Update all UI components
+        updateMeters(this.stages);
+        updateSignalFlowIndicators(this.stages);
+        updateSummary(this.stages, result.preampOutput, result.finalOutput, this.state);
+    }
+
+    /**
+     * Get current state (read-only copy)
+     * @returns {Object}
+     */
+    getState() {
+        return { ...this.state };
+    }
+
+    /**
+     * Get current stages (read-only copy)
+     * @returns {Array}
+     */
+    getStages() {
+        return [...this.stages];
+    }
+
+    /**
+     * Cleanup all event listeners
+     */
+    destroy() {
+        this.cleanupFns.forEach(fn => {
+            if (typeof fn === 'function') fn();
+        });
+        this.cleanupFns = [];
+
+        if (this.updateTimer) {
+            clearTimeout(this.updateTimer);
+            this.updateTimer = null;
+        }
+    }
+}
+
+// Initialize on DOM ready with slight delay for rendering
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        window.gainSimulator = new GainStagingSimulator();
+    }, 100);
+});
+
+
+</script>
+</body>
+</html>

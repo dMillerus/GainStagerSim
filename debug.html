@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Module Loading</title>
+</head>
+<body>
+    <h1>Debug Module Loading</h1>
+    <pre id="output"></pre>
+    <script type="module">
+        const log = (msg) => {
+            document.getElementById('output').textContent += msg + '\n';
+            console.log(msg);
+        };
+
+        log('Starting module load test...');
+
+        try {
+            log('1. Loading amp-config.js...');
+            const { defaultState } = await import('./src/js/config/amp-config.js');
+            log('   OK - defaultState loaded');
+
+            log('2. Loading gain-math.js...');
+            const gainMath = await import('./src/js/core/gain-math.js');
+            log('   OK - gain-math loaded');
+
+            log('3. Loading state.js...');
+            const state = await import('./src/js/core/state.js');
+            log('   OK - state loaded, getStateKey: ' + typeof state.getStateKey);
+
+            log('4. Loading signal-chain.js...');
+            const { calculateSignalChain } = await import('./src/js/core/signal-chain.js');
+            log('   OK - signal-chain loaded');
+
+            log('5. Loading meters.js...');
+            const meters = await import('./src/js/ui/meters.js');
+            log('   OK - meters loaded');
+
+            log('6. Loading summary.js...');
+            const summary = await import('./src/js/ui/summary.js');
+            log('   OK - summary loaded');
+
+            log('7. Loading signal-flow.js...');
+            const signalFlow = await import('./src/js/ui/signal-flow.js');
+            log('   OK - signal-flow loaded');
+
+            log('8. Loading knobs.js...');
+            const knobs = await import('./src/js/controls/knobs.js');
+            log('   OK - knobs loaded');
+
+            log('9. Loading switches.js...');
+            const switches = await import('./src/js/controls/switches.js');
+            log('   OK - switches loaded');
+
+            log('10. Loading selectors.js...');
+            const selectors = await import('./src/js/controls/selectors.js');
+            log('   OK - selectors loaded');
+
+            log('11. Loading view-toggle.js...');
+            const viewToggle = await import('./src/js/controls/view-toggle.js');
+            log('   OK - view-toggle loaded');
+
+            log('12. Loading main.js...');
+            const main = await import('./src/js/main.js');
+            log('   OK - main loaded');
+
+            log('\n=== ALL MODULES LOADED SUCCESSFULLY ===');
+
+        } catch (e) {
+            log('\nERROR: ' + e.message);
+            log('Stack: ' + e.stack);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+/* responsive.css - Media queries */
+
+@media (max-width: 768px) {
+    .controls-row {
+        gap: 15px;
+    }
+
+    .knob-container, .knob {
+        width: var(--knob-size-mobile);
+        height: var(--knob-size-mobile);
+    }
+
+    .knob::after {
+        height: 16px;
+        transform-origin: center 20px;
+    }
+
+    .meter-panel {
+        padding: 8px 10px;
+    }
+
+    .meter {
+        min-width: 42px;
+        padding: 4px 3px;
+    }
+
+    .meter-bar-container {
+        height: var(--meter-bar-height-mobile);
+    }
+
+    body {
+        padding-bottom: 120px;
+    }
+}

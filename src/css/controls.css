@@ -1,0 +1,192 @@
+/* controls.css - Knobs, switches, selectors */
+
+/* View Toggle */
+.view-toggle {
+    display: flex;
+    background: var(--color-bg-control-dark);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.view-option {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.view-option:hover {
+    color: var(--color-text-secondary);
+    background: rgba(var(--color-accent-rgb), 0.1);
+}
+
+.view-option.active {
+    background: #3a5a5a;
+    color: var(--color-accent);
+}
+
+/* Knobs */
+.knob-container {
+    position: relative;
+    width: var(--knob-size);
+    height: var(--knob-size);
+    margin-bottom: 8px;
+}
+
+.knob {
+    width: var(--knob-size);
+    height: var(--knob-size);
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #4a4a5a, var(--color-bg-control) 60%, var(--color-bg-control-dark));
+    box-shadow: var(--shadow-knob);
+    cursor: ns-resize;
+    position: relative;
+    user-select: none;
+}
+
+.knob::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, var(--color-accent), var(--color-accent-dark));
+    border-radius: 2px;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    transform-origin: center 24px;
+    box-shadow: 0 0 8px var(--color-accent-glow-strong);
+}
+
+.knob-label {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.knob-value {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+/* Switches */
+.switch-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.switch {
+    width: 50px;
+    height: 28px;
+    background: linear-gradient(180deg, var(--color-bg-control-dark), var(--color-bg-control));
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 1px 0 rgba(255, 255, 255, 0.05);
+    margin-bottom: 8px;
+}
+
+.switch::after {
+    content: attr(data-state);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.65rem;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.switch.active {
+    background: linear-gradient(180deg, #2a4a4a, #1a3a3a);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 10px var(--color-accent-glow);
+}
+
+.switch-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+}
+
+/* Pickup Selector */
+.pickup-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.pickup-pos {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-bg-control);
+    border: 2px solid var(--color-border-light);
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.pickup-pos.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent-glow-strong);
+}
+
+/* ERA Switch */
+.era-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.era-pos {
+    padding: 4px 8px;
+    font-size: 0.65rem;
+    background: var(--color-bg-control);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all var(--transition-normal);
+}
+
+.era-pos.active {
+    background: #3a5a5a;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+/* Captor Switch */
+.captor-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.captor-pos {
+    padding: 4px 6px;
+    font-size: 0.6rem;
+    background: var(--color-bg-control);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: all var(--transition-normal);
+}
+
+.captor-pos.active {
+    background: #3a5a5a;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}

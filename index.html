@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chupacabra + Klein-ulator Gain Staging Simulator v5</title>
+    <!-- CSS Modules -->
+    <link rel="stylesheet" href="./src/css/variables.css">
+    <link rel="stylesheet" href="./src/css/base.css">
+    <link rel="stylesheet" href="./src/css/layout.css">
+    <link rel="stylesheet" href="./src/css/controls.css">
+    <link rel="stylesheet" href="./src/css/meters.css">
+    <link rel="stylesheet" href="./src/css/summary.css">
+    <link rel="stylesheet" href="./src/css/responsive.css">
+</head>
+<body data-view="amp">
+    <div class="container">
+        <header>
+            <h1>Chupacabra + Klein-ulator Gain Staging Simulator</h1>
+            <p class="subtitle">Ceriatone 100W High-Gain Amplifier with Buffered FX Loop — v5</p>
+        </header>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settings-panel">
+            <h2 class="section-title">Settings</h2>
+            <div class="settings-row">
+                <div class="switch-container">
+                    <div class="view-toggle" id="view-toggle">
+                        <div class="view-option active" data-view="amp">Amp</div>
+                        <div class="view-option" data-view="signal">Signal Flow</div>
+                    </div>
+                    <span class="switch-label">View Mode</span>
+                </div>
+                <div class="switch-container">
+                    <div class="switch active" id="meter-panel-toggle" data-state="ON"></div>
+                    <span class="switch-label">Meter Panel</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AMP VIEW SECTIONS -->
+        <div class="amp-view-section">
+            <!-- Guitar Input Section -->
+            <div class="amp-section" id="input-section">
+                <h2 class="section-title">Guitar Input</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="pickup">
+                        <div class="pickup-selector" id="pickup-selector">
+                            <div class="pickup-pos" data-pos="neck" title="Neck"></div>
+                            <div class="pickup-pos" data-pos="middle" title="Middle"></div>
+                            <div class="pickup-pos active" data-pos="bridge" title="Bridge"></div>
+                        </div>
+                        <span class="knob-label">Pickup</span>
+                        <span class="knob-value" id="pickup-value">Bridge</span>
+                    </div>
+                    <div class="control-group" data-stage="guitar-volume">
+                        <div class="knob-container">
+                            <div class="knob" id="guitar-volume" data-value="10" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Guitar Vol</span>
+                        <span class="knob-value" id="guitar-volume-value">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preamp Section (Front Panel) -->
+            <div class="amp-section" id="preamp-section">
+                <h2 class="section-title">Preamp — Chupacabra 100 (Front Panel)</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="gain1">
+                        <div class="knob-container">
+                            <div class="knob" id="gain1" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Gain 1</span>
+                        <span class="knob-value" id="gain1-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="bright1">
+                        <div class="switch" id="bright1" data-state="OFF"></div>
+                        <span class="switch-label">Bright 1</span>
+                    </div>
+                    <div class="control-group" data-stage="gain2">
+                        <div class="knob-container">
+                            <div class="knob" id="gain2" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Gain 2</span>
+                        <span class="knob-value" id="gain2-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="bright2">
+                        <div class="switch" id="bright2" data-state="OFF"></div>
+                        <span class="switch-label">Bright 2</span>
+                    </div>
+                    <div class="switch-container" data-stage="era">
+                        <div class="era-switch" id="era-switch">
+                            <div class="era-pos" data-era="plexi">Plexi</div>
+                            <div class="era-pos active" data-era="80s">'80s</div>
+                            <div class="era-pos" data-era="modern">Modern</div>
+                        </div>
+                        <span class="switch-label">ERA</span>
+                    </div>
+                    <div class="control-group" data-stage="bass">
+                        <div class="knob-container">
+                            <div class="knob" id="bass" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Bass</span>
+                        <span class="knob-value" id="bass-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="middle">
+                        <div class="knob-container">
+                            <div class="knob" id="middle" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Middle</span>
+                        <span class="knob-value" id="middle-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="treble">
+                        <div class="knob-container">
+                            <div class="knob" id="treble" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Treble</span>
+                        <span class="knob-value" id="treble-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FX Loop Section (Klein-ulator) -->
+            <div class="amp-section" id="fxloop-section">
+                <h2 class="section-title">FX Loop — Klein-ulator</h2>
+                <div class="controls-row">
+                    <div class="switch-container" data-stage="loop-bypass">
+                        <div class="switch active" id="loop-bypass" data-state="ON"></div>
+                        <span class="switch-label">Loop</span>
+                    </div>
+                    <div class="control-group" data-stage="send">
+                        <div class="knob-container">
+                            <div class="knob" id="send" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Send</span>
+                        <span class="knob-value" id="send-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="send-bright">
+                        <div class="switch" id="send-bright" data-state="OFF"></div>
+                        <span class="switch-label">Send Bright</span>
+                    </div>
+                    <div class="control-group" data-stage="return">
+                        <div class="knob-container">
+                            <div class="knob" id="return" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Return</span>
+                        <span class="knob-value" id="return-value">5</span>
+                    </div>
+                    <div class="switch-container" data-stage="return-bright">
+                        <div class="switch" id="return-bright" data-state="OFF"></div>
+                        <span class="switch-label">Ret Bright</span>
+                    </div>
+                    <div class="control-group" data-stage="recovery">
+                        <div class="knob-container">
+                            <div class="knob" id="recovery" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Recovery</span>
+                        <span class="knob-value" id="recovery-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Section (Rear Panel) -->
+            <div class="amp-section" id="power-section">
+                <h2 class="section-title">Power Section — Chupacabra 100 (Rear Panel)</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="master">
+                        <div class="knob-container">
+                            <div class="knob" id="master" data-value="3" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Master</span>
+                        <span class="knob-value" id="master-value">3</span>
+                    </div>
+                    <div class="switch-container" data-stage="focus">
+                        <div class="switch" id="focus" data-state="OFF"></div>
+                        <span class="switch-label">Focus</span>
+                    </div>
+                    <div class="control-group" data-stage="presence">
+                        <div class="knob-container">
+                            <div class="knob" id="presence" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Presence</span>
+                        <span class="knob-value" id="presence-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="resonance">
+                        <div class="knob-container">
+                            <div class="knob" id="resonance" data-value="5" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Resonance</span>
+                        <span class="knob-value" id="resonance-value">5</span>
+                    </div>
+                    <div class="control-group" data-stage="pussy-trimmer">
+                        <div class="knob-container">
+                            <div class="knob" id="pussy-trimmer" data-value="10" data-min="0" data-max="10"></div>
+                        </div>
+                        <span class="knob-label">Pussy Trim</span>
+                        <span class="knob-value" id="pussy-trimmer-value">10</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section (Captor X) -->
+            <div class="amp-section" id="output-section">
+                <h2 class="section-title">Output — Captor X</h2>
+                <div class="controls-row">
+                    <div class="switch-container" data-stage="captor">
+                        <div class="captor-switch" id="captor-atten">
+                            <div class="captor-pos active" data-atten="0">0dB</div>
+                            <div class="captor-pos" data-atten="-12">-12dB</div>
+                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                        </div>
+                        <span class="switch-label">Attenuation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIGNAL FLOW VIEW SECTIONS -->
+        <div class="signal-flow-section">
+            <!-- Input Stage -->
+            <div class="amp-section">
+                <h2 class="section-title">Input Stage</h2>
+                <div class="controls-row">
+                    <div class="control-group" data-stage="pickup">
+                        <div class="pickup-selector" id="pickup-selector-sf">
+                            <div class="pickup-pos" data-pos="neck" title="Neck"></div>
+                            <div class="pickup-pos" data-pos="middle" title="Middle"></div>
+                            <div class="pickup-pos active" data-pos="bridge" title="Bridge"></div>
+                        </div>
+                        <span class="knob-label">Pickup</span>
+                        <span class="knob-value" id="pickup-value-sf">Bridge</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group" data-stage="guitar-volume">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                        </div>
+                        <span class="knob-label">Guitar Vol</span>
+                        <span class="knob-value" id="guitar-volume-sf-value">10</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Input">
+                        <span class="indicator-name">Input</span>
+                        <span class="indicator-level" id="sf-level-input">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preamp Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">Preamp Stages</h2>
+                <div class="controls-row">
+                    <div class="stage-indicator" data-stage-id="V1a">
+                        <span class="indicator-name">V1a</span>
+                        <span class="indicator-level" id="sf-level-v1a">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                        </div>
+                        <span class="knob-label">Gain 1</span>
+                        <span class="knob-value" id="gain1-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
+                        <span class="switch-label">Brt 1</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V1b">
+                        <span class="indicator-name">V1b</span>
+                        <span class="indicator-level" id="sf-level-v1b">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                        </div>
+                        <span class="knob-label">Gain 2</span>
+                        <span class="knob-value" id="gain2-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
+                        <span class="switch-label">Brt 2</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V2a">
+                        <span class="indicator-name">V2a</span>
+                        <span class="indicator-level" id="sf-level-v2a">--</span>
+                    </div>
+                </div>
+                <div class="controls-row" style="margin-top: 15px;">
+                    <span class="flow-arrow">→</span>
+                    <div class="switch-container">
+                        <div class="era-switch" id="era-switch-sf">
+                            <div class="era-pos" data-era="plexi">Plexi</div>
+                            <div class="era-pos active" data-era="80s">'80s</div>
+                            <div class="era-pos" data-era="modern">Modern</div>
+                        </div>
+                        <span class="switch-label">ERA</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                        </div>
+                        <span class="knob-label">Bass</span>
+                        <span class="knob-value" id="bass-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
+                        </div>
+                        <span class="knob-label">Mid</span>
+                        <span class="knob-value" id="middle-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
+                        </div>
+                        <span class="knob-label">Treble</span>
+                        <span class="knob-value" id="treble-sf-value">5</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Tonestack">
+                        <span class="indicator-name">Tone</span>
+                        <span class="indicator-level" id="sf-level-tonestack">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="V2b">
+                        <span class="indicator-name">V2b</span>
+                        <span class="indicator-level" id="sf-level-v2b">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FX Loop Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">FX Loop — Klein-ulator</h2>
+                <div class="controls-row">
+                    <div class="switch-container">
+                        <div class="switch switch-sf active" id="loop-bypass-sf" data-state="ON" data-mirror="loop-bypass"></div>
+                        <span class="switch-label">Loop</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                        </div>
+                        <span class="knob-label">Send</span>
+                        <span class="knob-value" id="send-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
+                        <span class="switch-label">Brt</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Loop Out">
+                        <span class="indicator-name">Out</span>
+                        <span class="indicator-level" id="sf-level-loopout">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                        </div>
+                        <span class="knob-label">Return</span>
+                        <span class="knob-value" id="return-sf-value">5</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
+                        <span class="switch-label">Brt</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
+                        </div>
+                        <span class="knob-label">Recovery</span>
+                        <span class="knob-value" id="recovery-sf-value">5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Stages -->
+            <div class="amp-section">
+                <h2 class="section-title">Power Section</h2>
+                <div class="controls-row">
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                        </div>
+                        <span class="knob-label">Master</span>
+                        <span class="knob-value" id="master-sf-value">3</span>
+                    </div>
+                    <div class="switch-container">
+                        <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
+                        <span class="switch-label">Focus</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                        </div>
+                        <span class="knob-label">Presence</span>
+                        <span class="knob-value" id="presence-sf-value">5</span>
+                    </div>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
+                        </div>
+                        <span class="knob-label">Resonance</span>
+                        <span class="knob-value" id="resonance-sf-value">5</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="PI">
+                        <span class="indicator-name">PI</span>
+                        <span class="indicator-level" id="sf-level-pi">--</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group">
+                        <div class="knob-container">
+                            <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
+                        </div>
+                        <span class="knob-label">Bias</span>
+                        <span class="knob-value" id="pussy-trimmer-sf-value">10</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Power">
+                        <span class="indicator-name">Power</span>
+                        <span class="indicator-level" id="sf-level-power">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output -->
+            <div class="amp-section">
+                <h2 class="section-title">Output</h2>
+                <div class="controls-row">
+                    <div class="switch-container">
+                        <div class="captor-switch" id="captor-atten-sf">
+                            <div class="captor-pos active" data-atten="0">0dB</div>
+                            <div class="captor-pos" data-atten="-12">-12dB</div>
+                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                        </div>
+                        <span class="switch-label">Captor X</span>
+                    </div>
+                    <span class="flow-arrow">→</span>
+                    <div class="stage-indicator" data-stage-id="Captor X">
+                        <span class="indicator-name">Output</span>
+                        <span class="indicator-level" id="sf-level-captor">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Panel -->
+        <div class="summary-panel" id="summary-panel">
+            <h3 class="summary-title">Signal Analysis</h3>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <h4>Input Level</h4>
+                    <div class="value" id="summary-input">-6 dBV</div>
+                    <div class="detail" id="summary-input-detail">Bridge humbucker reference</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Preamp Output</h4>
+                    <div class="value" id="summary-preamp">-- dBV</div>
+                    <div class="detail" id="summary-preamp-detail">After V2b</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Speaker Output</h4>
+                    <div class="value" id="summary-output">-- dBV</div>
+                    <div class="detail" id="summary-output-detail">At Captor X</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Gain</h4>
+                    <div class="value" id="summary-gain">-- dB</div>
+                    <div class="detail" id="summary-gain-detail">Input to speaker</div>
+                </div>
+            </div>
+            <div class="tone-recommendation" id="tone-recommendation">
+                <h4>Tone Characteristics</h4>
+                <p id="tone-text">Analyzing signal chain...</p>
+            </div>
+            <div class="stage-list" id="stage-list"></div>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Meter Panel -->
+    <div class="meter-panel" id="meter-panel">
+        <div class="meter-panel-content">
+            <div class="meter-group" data-section="input" id="meter-group-input"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="preamp" id="meter-group-preamp"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="fxloop" id="meter-group-fxloop"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="power" id="meter-group-power"></div>
+            <div class="meter-divider"></div>
+            <div class="meter-group" data-section="output" id="meter-group-output"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript Module -->
+    <script type="module" src="./src/js/main.js"></script>
+    <script type="module">
+        // Debug: verify module loaded
+        setTimeout(() => {
+            if (window.gainSimulator) {
+                console.log('SUCCESS: gainSimulator is available');
+                console.log('State:', window.gainSimulator.getState());
+            } else {
+                console.error('FAILED: gainSimulator not initialized');
+            }
+        }, 500);
+    </script>
+    <script>
+        // Catch any global errors
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('Global error:', msg, 'at', url, line);
+            alert('Error: ' + msg);
+            return false;
+        };
+    </script>
+</body>
+</html>

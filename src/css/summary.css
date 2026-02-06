@@ -1,0 +1,80 @@
+/* summary.css - Summary panel, analysis */
+
+.summary-panel {
+    background: linear-gradient(180deg, #1e2a2a 0%, #162020 100%);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid #2a4a4a;
+}
+
+.summary-title {
+    font-size: 1rem;
+    color: var(--color-accent);
+    margin-bottom: 15px;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 15px;
+}
+
+.summary-card {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.summary-card h4 {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.summary-card .value {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.summary-card .detail {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+}
+
+.tone-recommendation {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: 8px;
+    border-left: 3px solid var(--color-accent);
+}
+
+.tone-recommendation h4 {
+    font-size: 0.8rem;
+    color: var(--color-accent);
+    margin-bottom: 6px;
+}
+
+.tone-recommendation p {
+    font-size: 0.8rem;
+    color: #ccc;
+    line-height: 1.5;
+}
+
+.stage-list {
+    font-size: 0.7rem;
+    color: var(--color-text-secondary);
+    margin-top: 10px;
+}
+
+.stage-list .clipping {
+    color: var(--color-led-orange);
+}
+
+.stage-list .clean {
+    color: var(--color-led-green);
+}

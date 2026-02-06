@@ -1,0 +1,110 @@
+/* layout.css - Sections, panels, rows */
+
+/* Settings Panel */
+.settings-panel {
+    background: linear-gradient(180deg, var(--color-bg-panel) 0%, var(--color-bg-panel-dark) 100%);
+    border-radius: var(--radius-lg);
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-panel), var(--shadow-inset);
+    border: 1px solid var(--color-border);
+}
+
+.settings-panel .section-title {
+    margin-bottom: 12px;
+}
+
+.settings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    align-items: center;
+}
+
+/* Amp Sections */
+.amp-section {
+    background: linear-gradient(180deg, var(--color-bg-section) 0%, var(--color-bg-section-dark) 100%);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-panel), var(--shadow-inset);
+}
+
+.section-title {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.controls-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+}
+
+/* View Mode Styles - Amp View (default) */
+body[data-view="amp"] .signal-flow-section {
+    display: none;
+}
+
+body[data-view="amp"] .amp-view-section {
+    display: block;
+}
+
+/* View Mode Styles - Signal Flow View */
+body[data-view="signal"] .amp-view-section {
+    display: none;
+}
+
+body[data-view="signal"] .signal-flow-section {
+    display: block;
+}
+
+.signal-flow-section .amp-section {
+    margin-bottom: 15px;
+}
+
+.signal-flow-section .controls-row {
+    gap: 15px;
+}
+
+.signal-flow-section .stage-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 50px;
+    padding: 8px;
+    background: rgba(var(--color-accent-rgb), 0.1);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(var(--color-accent-rgb), 0.3);
+}
+
+.signal-flow-section .stage-indicator .indicator-name {
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+.signal-flow-section .stage-indicator .indicator-level {
+    font-size: 0.6rem;
+    color: var(--color-text-secondary);
+    font-family: 'Consolas', monospace;
+}
+
+.flow-arrow {
+    color: var(--color-accent);
+    font-size: 1.2rem;
+    align-self: center;
+    opacity: 0.5;
+}
