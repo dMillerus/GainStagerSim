@@ -96,6 +96,21 @@ export function eraModifiedTaper(masterTaper, era) {
 }
 
 /**
+ * Pussy Trim taper - variable resistor to ground on V2a grid
+ * At 10: 0 dB (signal passes through)
+ * At 0: Full cut (-40 dB, effectively silent)
+ * Uses log curve since it's a voltage divider with pot to ground
+ * @param {number} value - Pot position (0-10)
+ * @returns {number} Attenuation in dB (0 to -40)
+ */
+export function pussyTrimTaper(value) {
+    if (value <= 0) return -40;  // Full cut
+    if (value >= 10) return 0;   // No cut
+    // Log taper for voltage divider behavior
+    return 20 * Math.log10(value / 10);
+}
+
+/**
  * Round to one decimal place
  * @param {number} value
  * @returns {number}

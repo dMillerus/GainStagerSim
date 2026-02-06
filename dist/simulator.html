@@ -196,6 +196,53 @@ body[data-view="signal"] .signal-flow-section {
     gap: 15px;
 }
 
+/* Unified Control Groups for Signal Flow View */
+.signal-flow-section .control-group-unified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 85px;
+    gap: 4px;
+}
+
+.signal-flow-section .stage-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.signal-flow-section .control-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.signal-flow-section .knob-wrapper,
+.signal-flow-section .switch-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.signal-flow-section .switch-wrapper {
+    padding-top: 8px;  /* Align switch with knob center */
+}
+
+.signal-flow-section .switch-wrapper .switch {
+    margin-bottom: 4px;
+}
+
+.signal-flow-section .dbv-level {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-family: 'Consolas', monospace;
+    margin-top: 2px;
+}
+
+/* Legacy stage-indicator (kept for stages without controls) */
 .signal-flow-section .stage-indicator {
     display: flex;
     flex-direction: column;
@@ -419,6 +466,40 @@ body[data-view="signal"] .signal-flow-section {
     background: #3a5a5a;
     border-color: var(--color-accent);
     color: var(--color-accent);
+}
+
+/* Click-to-Edit Value Input */
+.value-edit-container {
+    position: relative;
+    min-width: 40px;
+    text-align: center;
+}
+
+.knob-value.editable {
+    cursor: pointer;
+    border-bottom: 1px dashed var(--color-accent);
+    padding-bottom: 1px;
+}
+
+.knob-value.editable:hover {
+    border-bottom-style: solid;
+}
+
+.value-input {
+    width: 40px;
+    padding: 2px 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    background: var(--color-bg-control);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    outline: none;
+}
+
+.value-input:focus {
+    box-shadow: 0 0 4px var(--color-accent-glow);
 }
 
 </style>
@@ -903,17 +984,20 @@ body[data-view="signal"] .signal-flow-section {
                         <span class="knob-value" id="pickup-value-sf">Bridge</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group" data-stage="guitar-volume">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                    <div class="control-group-unified" data-stage="guitar-volume">
+                        <span class="stage-label">Input</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                                </div>
+                                <span class="knob-label">Guitar Vol</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="guitar-volume-sf-value">10</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-input">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Guitar Vol</span>
-                        <span class="knob-value" id="guitar-volume-sf-value">10</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Input">
-                        <span class="indicator-name">Input</span>
-                        <span class="indicator-level" id="sf-level-input">--</span>
                     </div>
                 </div>
             </div>
@@ -922,38 +1006,60 @@ body[data-view="signal"] .signal-flow-section {
             <div class="amp-section">
                 <h2 class="section-title">Preamp Stages</h2>
                 <div class="controls-row">
-                    <div class="stage-indicator" data-stage-id="V1a">
-                        <span class="indicator-name">V1a</span>
-                        <span class="indicator-level" id="sf-level-v1a">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                    <div class="control-group-unified" data-stage="v1a">
+                        <span class="stage-label">V1a</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                                </div>
+                                <span class="knob-label">Gain 1</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="gain1-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-v1a">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
+                                <span class="switch-label">Brt 1</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Gain 1</span>
-                        <span class="knob-value" id="gain1-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
-                        <span class="switch-label">Brt 1</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V1b">
-                        <span class="indicator-name">V1b</span>
-                        <span class="indicator-level" id="sf-level-v1b">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                    <div class="control-group-unified" data-stage="v1b">
+                        <span class="stage-label">V1b</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                                </div>
+                                <span class="knob-label">Gain 2</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="gain2-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-v1b">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
+                                <span class="switch-label">Brt 2</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Gain 2</span>
-                        <span class="knob-value" id="gain2-sf-value">5</span>
                     </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
-                        <span class="switch-label">Brt 2</span>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group-unified" data-stage="pt">
+                        <span class="stage-label">PT</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
+                                </div>
+                                <span class="knob-label">Pussy Trim</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="pussy-trimmer-sf-value">10</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-pt">--</span>
+                            </div>
+                        </div>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="V2a">
@@ -971,31 +1077,38 @@ body[data-view="signal"] .signal-flow-section {
                         </div>
                         <span class="switch-label">ERA</span>
                     </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                    <div class="control-group-unified" data-stage="tonestack">
+                        <span class="stage-label">Tonestack</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                                </div>
+                                <span class="knob-label">Bass</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="bass-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
+                                </div>
+                                <span class="knob-label">Mid</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="middle-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
+                                </div>
+                                <span class="knob-label">Treble</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="treble-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-tonestack">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Bass</span>
-                        <span class="knob-value" id="bass-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
-                        </div>
-                        <span class="knob-label">Mid</span>
-                        <span class="knob-value" id="middle-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
-                        </div>
-                        <span class="knob-label">Treble</span>
-                        <span class="knob-value" id="treble-sf-value">5</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Tonestack">
-                        <span class="indicator-name">Tone</span>
-                        <span class="indicator-level" id="sf-level-tonestack">--</span>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="V2b">
@@ -1014,41 +1127,58 @@ body[data-view="signal"] .signal-flow-section {
                         <span class="switch-label">Loop</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                    <div class="control-group-unified" data-stage="send">
+                        <span class="stage-label">Send</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="send-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-loopout">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
+                                <span class="switch-label">Brt</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Send</span>
-                        <span class="knob-value" id="send-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
-                        <span class="switch-label">Brt</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Loop Out">
-                        <span class="indicator-name">Out</span>
-                        <span class="indicator-level" id="sf-level-loopout">--</span>
+                    <div class="control-group-unified" data-stage="return">
+                        <span class="stage-label">Return</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="return-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
+                                <span class="switch-label">Brt</span>
+                            </div>
+                        </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                    <div class="control-group-unified" data-stage="recovery">
+                        <span class="stage-label">Recovery</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="recovery-sf-value">5</span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="knob-label">Return</span>
-                        <span class="knob-value" id="return-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
-                        <span class="switch-label">Brt</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
-                        </div>
-                        <span class="knob-label">Recovery</span>
-                        <span class="knob-value" id="recovery-sf-value">5</span>
                     </div>
                 </div>
             </div>
@@ -1057,44 +1187,48 @@ body[data-view="signal"] .signal-flow-section {
             <div class="amp-section">
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                    <div class="control-group-unified" data-stage="master">
+                        <span class="stage-label">PPIMV</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                                </div>
+                                <span class="knob-label">Master</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="master-sf-value">3</span>
+                                </div>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
+                                <span class="switch-label">Focus</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Master</span>
-                        <span class="knob-value" id="master-sf-value">3</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
-                        <span class="switch-label">Focus</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                    <div class="control-group-unified" data-stage="pi">
+                        <span class="stage-label">PI</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                                </div>
+                                <span class="knob-label">Presence</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="presence-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
+                                </div>
+                                <span class="knob-label">Resonance</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="resonance-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-pi">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Presence</span>
-                        <span class="knob-value" id="presence-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
-                        </div>
-                        <span class="knob-label">Resonance</span>
-                        <span class="knob-value" id="resonance-sf-value">5</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="PI">
-                        <span class="indicator-name">PI</span>
-                        <span class="indicator-level" id="sf-level-pi">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
-                        </div>
-                        <span class="knob-label">Bias</span>
-                        <span class="knob-value" id="pussy-trimmer-sf-value">10</span>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="Power">
@@ -1108,18 +1242,19 @@ body[data-view="signal"] .signal-flow-section {
             <div class="amp-section">
                 <h2 class="section-title">Output</h2>
                 <div class="controls-row">
-                    <div class="switch-container">
-                        <div class="captor-switch" id="captor-atten-sf">
-                            <div class="captor-pos active" data-atten="0">0dB</div>
-                            <div class="captor-pos" data-atten="-12">-12dB</div>
-                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                    <div class="control-group-unified" data-stage="captor">
+                        <span class="stage-label">Captor X</span>
+                        <div class="control-row">
+                            <div class="switch-container">
+                                <div class="captor-switch" id="captor-atten-sf">
+                                    <div class="captor-pos active" data-atten="0">0dB</div>
+                                    <div class="captor-pos" data-atten="-12">-12dB</div>
+                                    <div class="captor-pos" data-atten="-38">-38dB</div>
+                                </div>
+                                <span class="switch-label">Attenuation</span>
+                                <span class="dbv-level" id="sf-level-captor">--</span>
+                            </div>
                         </div>
-                        <span class="switch-label">Captor X</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Captor X">
-                        <span class="indicator-name">Output</span>
-                        <span class="indicator-level" id="sf-level-captor">--</span>
                     </div>
                 </div>
             </div>
@@ -1253,7 +1388,7 @@ const meterConfig = {
  */
 const stageCounts = {
     input: 3,
-    preamp: 7,
+    preamp: 8,  // Added Pussy Trim between Gain 2 and V2a
     fxloop: 6,
     power: 6,
     output: 1
@@ -1414,6 +1549,21 @@ function eraModifiedTaper(masterTaper, era) {
 }
 
 /**
+ * Pussy Trim taper - variable resistor to ground on V2a grid
+ * At 10: 0 dB (signal passes through)
+ * At 0: Full cut (-40 dB, effectively silent)
+ * Uses log curve since it's a voltage divider with pot to ground
+ * @param {number} value - Pot position (0-10)
+ * @returns {number} Attenuation in dB (0 to -40)
+ */
+function pussyTrimTaper(value) {
+    if (value <= 0) return -40;  // Full cut
+    if (value >= 10) return 0;   // No cut
+    // Log taper for voltage divider behavior
+    return 20 * Math.log10(value / 10);
+}
+
+/**
  * Round to one decimal place
  * @param {number} value
  * @returns {number}
@@ -1524,21 +1674,26 @@ function calculateSignalChain(state) {
     }
     addStage('Gain 2', level, gain2Atten + (s.bright2 ? brightBoost.high : 0), 0, 'preamp');
 
-    // Stage 8: V2a (third gain stage)
+    // Stage 8: Pussy Trim (V2a grid shunt - variable resistor to ground)
+    const pussyTrimAtten = pussyTrimTaper(s.pussyTrimmer);
+    level += pussyTrimAtten;
+    addStage('Pussy Trim', level, pussyTrimAtten, 0, 'preamp');
+
+    // Stage 9: V2a (third gain stage)
     const v2a = tubeStages.v2a;
     level += v2a.gain;
     clip = softClip(level, v2a.threshold, v2a.knee);
     level = clip.clamped;
     addStage('V2a', level, v2a.gain, clip.drive, 'preamp', v2a.threshold);
 
-    // Stage 9: Tonestack (ERA-dependent loss)
+    // Stage 10: Tonestack (ERA-dependent loss)
     const tonestackLoss = eraLoss[s.era];
     const toneMod = tonestackMod(s.bass, s.middle, s.treble);
     const totalToneLoss = tonestackLoss + toneMod;
     level += totalToneLoss;
     addStage('Tonestack', level, totalToneLoss, 0, 'preamp');
 
-    // Stage 10: V2b (fourth gain stage / recovery)
+    // Stage 11: V2b (fourth gain stage / recovery)
     const v2b = tubeStages.v2b;
     level += v2b.gain;
     clip = softClip(level, v2b.threshold, v2b.knee);
@@ -1549,32 +1704,32 @@ function calculateSignalChain(state) {
 
     // FX Loop Section (Klein-ulator)
     if (s.loopEnabled) {
-        // Stage 11: FX Send level
+        // Stage 12: FX Send level
         const sendLevel = linearTaper(s.send);
         level += sendLevel;
         addStage('Send', level, sendLevel, 0, 'fxloop');
 
-        // Stage 12: Send bright switch
+        // Stage 13: Send bright switch
         if (s.sendBright) {
             level += brightBoost.mid;
             addStage('Send Brt', level, brightBoost.mid, 0, 'fxloop');
         }
 
-        // Stage 13: FX Loop out (to pedals) - assume unity gain external
+        // Stage 14: FX Loop out (to pedals) - assume unity gain external
         addStage('Loop Out', level, 0, 0, 'fxloop');
 
-        // Stage 14: FX Return level
+        // Stage 15: FX Return level
         const returnLevel = linearTaper(s.return);
         level += returnLevel;
         addStage('Return', level, returnLevel, 0, 'fxloop');
 
-        // Stage 15: Return bright switch
+        // Stage 16: Return bright switch
         if (s.returnBright) {
             level += brightBoost.high;
             addStage('Ret Brt', level, brightBoost.high, 0, 'fxloop');
         }
 
-        // Stage 16: Recovery stage (compensation at noon)
+        // Stage 17: Recovery stage (compensation at noon)
         const recoveryGain = linearTaper(s.recovery) + recoveryCompensation;
         level += recoveryGain;
         addStage('Recovery', level, recoveryGain, 0, 'fxloop');
@@ -1582,44 +1737,43 @@ function calculateSignalChain(state) {
 
     // Power Section
 
-    // Stage 17: Master volume
+    // Stage 18: Master volume
     let masterTaper = logTaper(s.master);
     masterTaper = eraModifiedTaper(masterTaper, s.era);
     level += masterTaper;
     addStage('Master', level, masterTaper, 0, 'power');
 
-    // Stage 18: Focus switch (slight presence boost)
+    // Stage 19: Focus switch (slight presence boost)
     if (s.focus) {
         level += 1.0;
         addStage('Focus', level, 1.0, 0, 'power');
     }
 
-    // Stage 19: Presence - high frequency negative feedback
+    // Stage 20: Presence - high frequency negative feedback
     const presenceGain = nfbGain(s.presence);
     level += presenceGain;
     addStage('Presence', level, presenceGain, 0, 'power');
 
-    // Stage 20: Resonance - low frequency negative feedback
+    // Stage 21: Resonance - low frequency negative feedback
     const resonanceGain = nfbGain(s.resonance);
     level += resonanceGain;
     addStage('Resonance', level, resonanceGain, 0, 'power');
 
-    // Stage 21: Phase Inverter
+    // Stage 22: Phase Inverter
     const pi = tubeStages.pi;
     level += pi.gain;
     clip = softClip(level, pi.threshold, pi.knee);
     level = clip.clamped;
     addStage('PI', level, pi.gain, clip.drive, 'power', pi.threshold);
 
-    // Stage 22: Power tubes (4×EL34)
+    // Stage 23: Power tubes (4×EL34)
     const power = tubeStages.power;
-    const pussyMod = (s.pussyTrimmer - 10) * 0.2;
-    level += power.gain + pussyMod;
+    level += power.gain;
     clip = softClip(level, power.threshold, power.knee);
     level = clip.clamped;
-    addStage('Power', level, power.gain + pussyMod, clip.drive, 'power', power.threshold);
+    addStage('Power', level, power.gain, clip.drive, 'power', power.threshold);
 
-    // Stage 23: Captor X output
+    // Stage 24: Captor X output
     level += s.captorAtten;
     addStage('Captor X', level, s.captorAtten, 0, 'output');
 
@@ -1954,6 +2108,7 @@ const stageElementMap = {
     'Input': 'sf-level-input',
     'V1a': 'sf-level-v1a',
     'V1b': 'sf-level-v1b',
+    'Pussy Trim': 'sf-level-pt',
     'V2a': 'sf-level-v2a',
     'Tonestack': 'sf-level-tonestack',
     'V2b': 'sf-level-v2b',
@@ -2312,8 +2467,119 @@ function setKnobValue(knobId, value) {
     if (valueEl) valueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
 }
 
+/**
+ * Setup click-to-edit for knob values
+ * @param {Function} onUpdate - Callback when value changes
+ * @returns {Function} Cleanup function
+ */
+function setupValueEdit(onUpdate) {
+    const editableValues = document.querySelectorAll('.knob-value.editable');
+    const cleanupFns = [];
+
+    editableValues.forEach(valueEl => {
+        const handleClick = (e) => {
+            // Prevent if already editing
+            if (valueEl.querySelector('.value-input')) return;
+
+            const currentValue = valueEl.textContent;
+            const knobId = valueEl.id.replace('-value', '');
+            const knob = document.getElementById(knobId);
+            if (!knob) return;
+
+            const min = parseFloat(knob.dataset.min);
+            const max = parseFloat(knob.dataset.max);
+
+            // Create input field
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'value-input';
+            input.value = currentValue;
+            input.min = min;
+            input.max = max;
+            input.step = '0.1';
+
+            // Store original text and replace with input
+            const originalText = valueEl.textContent;
+            valueEl.textContent = '';
+            valueEl.appendChild(input);
+            input.focus();
+            input.select();
+
+            const commitValue = () => {
+                let newValue = parseFloat(input.value);
+                if (isNaN(newValue)) newValue = parseFloat(originalText);
+                newValue = Math.max(min, Math.min(max, newValue));
+
+                // Remove input and restore text display
+                valueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+
+                // Update knob rotation
+                const rotation = -135 + (newValue / max) * 270;
+                knob.dataset.value = newValue;
+                knob.style.setProperty('--knob-rotation', `${rotation}deg`);
+
+                // Mirror to paired control
+                if (knob.dataset.mirror) {
+                    const mirrorKnob = document.getElementById(knob.dataset.mirror);
+                    if (mirrorKnob) {
+                        mirrorKnob.dataset.value = newValue;
+                        mirrorKnob.style.setProperty('--knob-rotation', `${rotation}deg`);
+                        const mirrorValueEl = document.getElementById(`${knob.dataset.mirror}-value`);
+                        if (mirrorValueEl) mirrorValueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+                    }
+                } else {
+                    // Check if this is the main control and update SF version
+                    const sfKnob = document.getElementById(`${knobId}-sf`);
+                    if (sfKnob) {
+                        sfKnob.dataset.value = newValue;
+                        sfKnob.style.setProperty('--knob-rotation', `${rotation}deg`);
+                        const sfValueEl = document.getElementById(`${knobId}-sf-value`);
+                        if (sfValueEl) sfValueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+                    }
+                }
+
+                // Notify state change
+                const stateKey = getStateKey(knobId);
+                onUpdate(stateKey, newValue);
+            };
+
+            const cancelEdit = () => {
+                valueEl.textContent = originalText;
+            };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    commitValue();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            };
+
+            const handleBlur = () => {
+                // Small delay to allow click detection
+                setTimeout(() => {
+                    if (valueEl.contains(input)) {
+                        commitValue();
+                    }
+                }, 10);
+            };
+
+            input.addEventListener('keydown', handleKeyDown);
+            input.addEventListener('blur', handleBlur);
+        };
+
+        valueEl.addEventListener('click', handleClick);
+        cleanupFns.push(() => valueEl.removeEventListener('click', handleClick));
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
     setupKnobs,
-    setKnobValue
+    setKnobValue,
+    setupValueEdit
 };
 
 // === End ./controls/knobs.js ===
@@ -2780,6 +3046,7 @@ class GainStagingSimulator {
 
         // Setup all control handlers
         this.cleanupFns.push(setupKnobs(onStateUpdate));
+        this.cleanupFns.push(setupValueEdit(onStateUpdate));
         this.cleanupFns.push(setupSwitches(onStateUpdate));
         this.cleanupFns.push(setupPickupSelector(onStateUpdate));
         this.cleanupFns.push(setupEraSwitches(onStateUpdate));
@@ -2848,14 +3115,47 @@ class GainStagingSimulator {
     }
 }
 
-// Initialize on DOM ready with slight delay for rendering
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize - modules are deferred so DOM is already ready
+function init() {
+    console.log('init() called, readyState:', document.readyState);
     setTimeout(() => {
-        window.gainSimulator = new GainStagingSimulator();
+        try {
+            console.log('Creating GainStagingSimulator...');
+            window.gainSimulator = new GainStagingSimulator();
+            console.log('GainStagingSimulator initialized successfully');
+        } catch (e) {
+            console.error('Failed to initialize:', e);
+        }
     }, 100);
-});
+}
+
+// Handle both cases: DOM already ready or still loading
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 
 
 </script>
+    <script type="module">
+        // Debug: verify module loaded
+        setTimeout(() => {
+            if (window.gainSimulator) {
+                console.log('SUCCESS: gainSimulator is available');
+                console.log('State:', window.gainSimulator.getState());
+            } else {
+                console.error('FAILED: gainSimulator not initialized');
+            }
+        }, 500);
+    </script>
+    <script>
+        // Catch any global errors
+        window.onerror = function(msg, url, line, col, error) {
+            console.error('Global error:', msg, 'at', url, line);
+            alert('Error: ' + msg);
+            return false;
+        };
+    </script>
 </body>
 </html>

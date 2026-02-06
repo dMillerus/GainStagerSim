@@ -79,6 +79,53 @@ body[data-view="signal"] .signal-flow-section {
     gap: 15px;
 }
 
+/* Unified Control Groups for Signal Flow View */
+.signal-flow-section .control-group-unified {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 85px;
+    gap: 4px;
+}
+
+.signal-flow-section .stage-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.signal-flow-section .control-row {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.signal-flow-section .knob-wrapper,
+.signal-flow-section .switch-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.signal-flow-section .switch-wrapper {
+    padding-top: 8px;  /* Align switch with knob center */
+}
+
+.signal-flow-section .switch-wrapper .switch {
+    margin-bottom: 4px;
+}
+
+.signal-flow-section .dbv-level {
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    font-family: 'Consolas', monospace;
+    margin-top: 2px;
+}
+
+/* Legacy stage-indicator (kept for stages without controls) */
 .signal-flow-section .stage-indicator {
     display: flex;
     flex-direction: column;

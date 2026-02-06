@@ -16,7 +16,7 @@ import { updateSummary } from './ui/summary.js';
 import { updateSignalFlowIndicators } from './ui/signal-flow.js';
 
 // Controls
-import { setupKnobs } from './controls/knobs.js';
+import { setupKnobs, setupValueEdit } from './controls/knobs.js';
 import { setupSwitches } from './controls/switches.js';
 import { setupPickupSelector, setupEraSwitches, setupCaptorSwitches } from './controls/selectors.js';
 import { setupViewToggle, setupMeterPanelToggle } from './controls/view-toggle.js';
@@ -54,6 +54,7 @@ class GainStagingSimulator {
 
         // Setup all control handlers
         this.cleanupFns.push(setupKnobs(onStateUpdate));
+        this.cleanupFns.push(setupValueEdit(onStateUpdate));
         this.cleanupFns.push(setupSwitches(onStateUpdate));
         this.cleanupFns.push(setupPickupSelector(onStateUpdate));
         this.cleanupFns.push(setupEraSwitches(onStateUpdate));

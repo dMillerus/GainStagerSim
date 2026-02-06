@@ -68,7 +68,7 @@ export const meterConfig = {
  */
 export const stageCounts = {
     input: 3,
-    preamp: 7,
+    preamp: 8,  // Added Pussy Trim between Gain 2 and V2a
     fxloop: 6,
     power: 6,
     output: 1

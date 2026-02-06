@@ -140,7 +140,118 @@ export function setKnobValue(knobId, value) {
     if (valueEl) valueEl.textContent = value.toFixed(value % 1 === 0 ? 0 : 1);
 }
 
+/**
+ * Setup click-to-edit for knob values
+ * @param {Function} onUpdate - Callback when value changes
+ * @returns {Function} Cleanup function
+ */
+export function setupValueEdit(onUpdate) {
+    const editableValues = document.querySelectorAll('.knob-value.editable');
+    const cleanupFns = [];
+
+    editableValues.forEach(valueEl => {
+        const handleClick = (e) => {
+            // Prevent if already editing
+            if (valueEl.querySelector('.value-input')) return;
+
+            const currentValue = valueEl.textContent;
+            const knobId = valueEl.id.replace('-value', '');
+            const knob = document.getElementById(knobId);
+            if (!knob) return;
+
+            const min = parseFloat(knob.dataset.min);
+            const max = parseFloat(knob.dataset.max);
+
+            // Create input field
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'value-input';
+            input.value = currentValue;
+            input.min = min;
+            input.max = max;
+            input.step = '0.1';
+
+            // Store original text and replace with input
+            const originalText = valueEl.textContent;
+            valueEl.textContent = '';
+            valueEl.appendChild(input);
+            input.focus();
+            input.select();
+
+            const commitValue = () => {
+                let newValue = parseFloat(input.value);
+                if (isNaN(newValue)) newValue = parseFloat(originalText);
+                newValue = Math.max(min, Math.min(max, newValue));
+
+                // Remove input and restore text display
+                valueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+
+                // Update knob rotation
+                const rotation = -135 + (newValue / max) * 270;
+                knob.dataset.value = newValue;
+                knob.style.setProperty('--knob-rotation', `${rotation}deg`);
+
+                // Mirror to paired control
+                if (knob.dataset.mirror) {
+                    const mirrorKnob = document.getElementById(knob.dataset.mirror);
+                    if (mirrorKnob) {
+                        mirrorKnob.dataset.value = newValue;
+                        mirrorKnob.style.setProperty('--knob-rotation', `${rotation}deg`);
+                        const mirrorValueEl = document.getElementById(`${knob.dataset.mirror}-value`);
+                        if (mirrorValueEl) mirrorValueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+                    }
+                } else {
+                    // Check if this is the main control and update SF version
+                    const sfKnob = document.getElementById(`${knobId}-sf`);
+                    if (sfKnob) {
+                        sfKnob.dataset.value = newValue;
+                        sfKnob.style.setProperty('--knob-rotation', `${rotation}deg`);
+                        const sfValueEl = document.getElementById(`${knobId}-sf-value`);
+                        if (sfValueEl) sfValueEl.textContent = newValue.toFixed(newValue % 1 === 0 ? 0 : 1);
+                    }
+                }
+
+                // Notify state change
+                const stateKey = getStateKey(knobId);
+                onUpdate(stateKey, newValue);
+            };
+
+            const cancelEdit = () => {
+                valueEl.textContent = originalText;
+            };
+
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    commitValue();
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelEdit();
+                }
+            };
+
+            const handleBlur = () => {
+                // Small delay to allow click detection
+                setTimeout(() => {
+                    if (valueEl.contains(input)) {
+                        commitValue();
+                    }
+                }, 10);
+            };
+
+            input.addEventListener('keydown', handleKeyDown);
+            input.addEventListener('blur', handleBlur);
+        };
+
+        valueEl.addEventListener('click', handleClick);
+        cleanupFns.push(() => valueEl.removeEventListener('click', handleClick));
+    });
+
+    return () => cleanupFns.forEach(fn => fn());
+}
+
 export default {
     setupKnobs,
-    setKnobValue
+    setKnobValue,
+    setupValueEdit
 };

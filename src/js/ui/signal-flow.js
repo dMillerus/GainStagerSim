@@ -12,6 +12,7 @@ const stageElementMap = {
     'Input': 'sf-level-input',
     'V1a': 'sf-level-v1a',
     'V1b': 'sf-level-v1b',
+    'Pussy Trim': 'sf-level-pt',
     'V2a': 'sf-level-v2a',
     'Tonestack': 'sf-level-tonestack',
     'V2b': 'sf-level-v2b',

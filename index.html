@@ -232,17 +232,20 @@
                         <span class="knob-value" id="pickup-value-sf">Bridge</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group" data-stage="guitar-volume">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                    <div class="control-group-unified" data-stage="guitar-volume">
+                        <span class="stage-label">Input</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="guitar-volume-sf" data-value="10" data-min="0" data-max="10" data-mirror="guitar-volume"></div>
+                                </div>
+                                <span class="knob-label">Guitar Vol</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="guitar-volume-sf-value">10</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-input">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Guitar Vol</span>
-                        <span class="knob-value" id="guitar-volume-sf-value">10</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Input">
-                        <span class="indicator-name">Input</span>
-                        <span class="indicator-level" id="sf-level-input">--</span>
                     </div>
                 </div>
             </div>
@@ -251,38 +254,60 @@
             <div class="amp-section">
                 <h2 class="section-title">Preamp Stages</h2>
                 <div class="controls-row">
-                    <div class="stage-indicator" data-stage-id="V1a">
-                        <span class="indicator-name">V1a</span>
-                        <span class="indicator-level" id="sf-level-v1a">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                    <div class="control-group-unified" data-stage="v1a">
+                        <span class="stage-label">V1a</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="gain1-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain1"></div>
+                                </div>
+                                <span class="knob-label">Gain 1</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="gain1-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-v1a">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
+                                <span class="switch-label">Brt 1</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Gain 1</span>
-                        <span class="knob-value" id="gain1-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="bright1-sf" data-state="OFF" data-mirror="bright1"></div>
-                        <span class="switch-label">Brt 1</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="V1b">
-                        <span class="indicator-name">V1b</span>
-                        <span class="indicator-level" id="sf-level-v1b">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                    <div class="control-group-unified" data-stage="v1b">
+                        <span class="stage-label">V1b</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="gain2-sf" data-value="5" data-min="0" data-max="10" data-mirror="gain2"></div>
+                                </div>
+                                <span class="knob-label">Gain 2</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="gain2-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-v1b">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
+                                <span class="switch-label">Brt 2</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Gain 2</span>
-                        <span class="knob-value" id="gain2-sf-value">5</span>
                     </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="bright2-sf" data-state="OFF" data-mirror="bright2"></div>
-                        <span class="switch-label">Brt 2</span>
+                    <span class="flow-arrow">→</span>
+                    <div class="control-group-unified" data-stage="pt">
+                        <span class="stage-label">PT</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
+                                </div>
+                                <span class="knob-label">Pussy Trim</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="pussy-trimmer-sf-value">10</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-pt">--</span>
+                            </div>
+                        </div>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="V2a">
@@ -300,31 +325,38 @@
                         </div>
                         <span class="switch-label">ERA</span>
                     </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                    <div class="control-group-unified" data-stage="tonestack">
+                        <span class="stage-label">Tonestack</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="bass-sf" data-value="5" data-min="0" data-max="10" data-mirror="bass"></div>
+                                </div>
+                                <span class="knob-label">Bass</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="bass-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
+                                </div>
+                                <span class="knob-label">Mid</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="middle-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
+                                </div>
+                                <span class="knob-label">Treble</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="treble-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-tonestack">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Bass</span>
-                        <span class="knob-value" id="bass-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="middle-sf" data-value="5" data-min="0" data-max="10" data-mirror="middle"></div>
-                        </div>
-                        <span class="knob-label">Mid</span>
-                        <span class="knob-value" id="middle-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="treble-sf" data-value="5" data-min="0" data-max="10" data-mirror="treble"></div>
-                        </div>
-                        <span class="knob-label">Treble</span>
-                        <span class="knob-value" id="treble-sf-value">5</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Tonestack">
-                        <span class="indicator-name">Tone</span>
-                        <span class="indicator-level" id="sf-level-tonestack">--</span>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="V2b">
@@ -343,41 +375,58 @@
                         <span class="switch-label">Loop</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                    <div class="control-group-unified" data-stage="send">
+                        <span class="stage-label">Send</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="send-sf" data-value="5" data-min="0" data-max="10" data-mirror="send"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="send-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-loopout">--</span>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
+                                <span class="switch-label">Brt</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Send</span>
-                        <span class="knob-value" id="send-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="send-bright-sf" data-state="OFF" data-mirror="send-bright"></div>
-                        <span class="switch-label">Brt</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Loop Out">
-                        <span class="indicator-name">Out</span>
-                        <span class="indicator-level" id="sf-level-loopout">--</span>
+                    <div class="control-group-unified" data-stage="return">
+                        <span class="stage-label">Return</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="return-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
+                                <span class="switch-label">Brt</span>
+                            </div>
+                        </div>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="return-sf" data-value="5" data-min="0" data-max="10" data-mirror="return"></div>
+                    <div class="control-group-unified" data-stage="recovery">
+                        <span class="stage-label">Recovery</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
+                                </div>
+                                <span class="knob-label">Level</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="recovery-sf-value">5</span>
+                                </div>
+                            </div>
                         </div>
-                        <span class="knob-label">Return</span>
-                        <span class="knob-value" id="return-sf-value">5</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="return-bright-sf" data-state="OFF" data-mirror="return-bright"></div>
-                        <span class="switch-label">Brt</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="recovery-sf" data-value="5" data-min="0" data-max="10" data-mirror="recovery"></div>
-                        </div>
-                        <span class="knob-label">Recovery</span>
-                        <span class="knob-value" id="recovery-sf-value">5</span>
                     </div>
                 </div>
             </div>
@@ -386,44 +435,48 @@
             <div class="amp-section">
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                    <div class="control-group-unified" data-stage="master">
+                        <span class="stage-label">PPIMV</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="master-sf" data-value="3" data-min="0" data-max="10" data-mirror="master"></div>
+                                </div>
+                                <span class="knob-label">Master</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="master-sf-value">3</span>
+                                </div>
+                            </div>
+                            <div class="switch-wrapper">
+                                <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
+                                <span class="switch-label">Focus</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Master</span>
-                        <span class="knob-value" id="master-sf-value">3</span>
-                    </div>
-                    <div class="switch-container">
-                        <div class="switch switch-sf" id="focus-sf" data-state="OFF" data-mirror="focus"></div>
-                        <span class="switch-label">Focus</span>
                     </div>
                     <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                    <div class="control-group-unified" data-stage="pi">
+                        <span class="stage-label">PI</span>
+                        <div class="control-row">
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="presence-sf" data-value="5" data-min="0" data-max="10" data-mirror="presence"></div>
+                                </div>
+                                <span class="knob-label">Presence</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="presence-sf-value">5</span>
+                                </div>
+                            </div>
+                            <div class="knob-wrapper">
+                                <div class="knob-container">
+                                    <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
+                                </div>
+                                <span class="knob-label">Resonance</span>
+                                <div class="value-edit-container">
+                                    <span class="knob-value editable" id="resonance-sf-value">5</span>
+                                </div>
+                                <span class="dbv-level" id="sf-level-pi">--</span>
+                            </div>
                         </div>
-                        <span class="knob-label">Presence</span>
-                        <span class="knob-value" id="presence-sf-value">5</span>
-                    </div>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="resonance-sf" data-value="5" data-min="0" data-max="10" data-mirror="resonance"></div>
-                        </div>
-                        <span class="knob-label">Resonance</span>
-                        <span class="knob-value" id="resonance-sf-value">5</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="PI">
-                        <span class="indicator-name">PI</span>
-                        <span class="indicator-level" id="sf-level-pi">--</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="control-group">
-                        <div class="knob-container">
-                            <div class="knob knob-sf" id="pussy-trimmer-sf" data-value="10" data-min="0" data-max="10" data-mirror="pussy-trimmer"></div>
-                        </div>
-                        <span class="knob-label">Bias</span>
-                        <span class="knob-value" id="pussy-trimmer-sf-value">10</span>
                     </div>
                     <span class="flow-arrow">→</span>
                     <div class="stage-indicator" data-stage-id="Power">
@@ -437,18 +490,19 @@
             <div class="amp-section">
                 <h2 class="section-title">Output</h2>
                 <div class="controls-row">
-                    <div class="switch-container">
-                        <div class="captor-switch" id="captor-atten-sf">
-                            <div class="captor-pos active" data-atten="0">0dB</div>
-                            <div class="captor-pos" data-atten="-12">-12dB</div>
-                            <div class="captor-pos" data-atten="-38">-38dB</div>
+                    <div class="control-group-unified" data-stage="captor">
+                        <span class="stage-label">Captor X</span>
+                        <div class="control-row">
+                            <div class="switch-container">
+                                <div class="captor-switch" id="captor-atten-sf">
+                                    <div class="captor-pos active" data-atten="0">0dB</div>
+                                    <div class="captor-pos" data-atten="-12">-12dB</div>
+                                    <div class="captor-pos" data-atten="-38">-38dB</div>
+                                </div>
+                                <span class="switch-label">Attenuation</span>
+                                <span class="dbv-level" id="sf-level-captor">--</span>
+                            </div>
                         </div>
-                        <span class="switch-label">Captor X</span>
-                    </div>
-                    <span class="flow-arrow">→</span>
-                    <div class="stage-indicator" data-stage-id="Captor X">
-                        <span class="indicator-name">Output</span>
-                        <span class="indicator-level" id="sf-level-captor">--</span>
                     </div>
                 </div>
             </div>
