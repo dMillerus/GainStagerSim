@@ -185,6 +185,8 @@ git commit -m "Build: update single-file distribution"
 
 **Corrected February 2026**: Earlier versions incorrectly modeled V2b as a +30 dB gain stage with 35 dBV clipping threshold. This has been corrected to accurately represent the cathode follower topology.
 
+**UI Signal Flow Corrected February 2026**: Signal Flow View previously showed incorrect signal order (V2b after tonestack, Master after FX loop). Now correctly displays: V2a → V2b (CF) → ERA → Master → Tonestack → FX Loop → Power. Amp View retains physical panel grouping but includes note that Master is pre-tonestack in signal path.
+
 ## Quick Reference
 
 | Task | File(s) |
