@@ -8,7 +8,7 @@ An interactive web-based gain staging simulator for the **Ceriatone Chupacabra 1
 
 ## 🎯 About
 
-The Chupacabra Gain Staging Simulator is an educational tool that helps guitarists and amp enthusiasts understand how signal levels evolve through a high-gain amplifier's signal chain. Watch in real-time as your control settings affect gain staging, saturation, and tone across the preamp, power amp, and FX loop.
+The Chupacabra Gain Staging Simulator is an educational tool designed to help guitarists and amp enthusiasts understand how signal levels evolve through a high-gain amplifier's signal chain. Watch in real-time as your control settings affect gain staging, saturation, and tone across the preamp, power amp, and FX loop.
 
 **What it models:**
 - **Ceriatone Chupacabra 100W**: Jose Arredondo-inspired high-gain Marshall derivative with three cascaded ECC83 preamp stages, dual gain controls, ERA voicing switch, and 4×EL34 power section
@@ -16,7 +16,7 @@ The Chupacabra Gain Staging Simulator is an educational tool that helps guitaris
 - **Signal chain**: 21+ metered stages from guitar pickup through Captor X reactive load
 - **Tube saturation**: Soft-clip algorithm modeling progressive tube compression
 
-This simulator is based on careful circuit analysis and measurements from actual Chupacabra units, with corrections applied in February 2026 to accurately model the V2b cathode follower stage and signal flow topology.
+This simulator is based on circuit topology analysis and theoretical modeling, with corrections applied in February 2026 to model the V2b cathode follower stage and signal flow topology. **Accuracy verification against actual hardware is ongoing work.**
 
 ---
 
@@ -44,10 +44,10 @@ This simulator is based on careful circuit analysis and measurements from actual
 - **Synchronized Controls**: Changes in one view instantly update the other
 
 ### Educational Tools
-- **Stage-by-Stage Breakdown**: See gain and clipping at every tube stage
-- **Pickup Selection**: Model Bridge/Middle/Neck humbucker output levels
+- **Stage-by-Stage Breakdown**: Visualize theoretical gain and clipping at every tube stage
+- **Pickup Selection**: Model typical Bridge/Middle/Neck humbucker output levels
 - **Captor X Integration**: Visualize speaker load and attenuation
-- **Comprehensive Analysis**: Understand where saturation occurs and why
+- **Comprehensive Analysis**: Explore where saturation is predicted to occur and why
 
 ---
 
@@ -107,11 +107,11 @@ Each stage shows two values:
 
 ### Understanding the Summary Panel
 
-The summary panel provides:
-- **Tone recommendations**: Suggested EQ adjustments based on your settings
-- **Headroom warnings**: Alerts when stages are running too hot or too cold
-- **Gain distribution**: Shows where gain and clipping occur in the signal chain
-- **Overall assessment**: "Warm overdrive," "Heavy saturation," "Clean headroom," etc.
+The summary panel provides theoretical analysis based on the current model:
+- **Tone recommendations**: Suggested EQ adjustments based on modeled gain staging
+- **Headroom warnings**: Alerts when modeled stages predict clipping or insufficient drive
+- **Gain distribution**: Shows where theoretical gain and clipping occur in the signal chain
+- **Overall assessment**: Predicted tone characteristics like "Warm overdrive," "Heavy saturation," "Clean headroom," etc.
 
 ### View Modes
 
@@ -125,6 +125,17 @@ Toggle between two organizational layouts:
 ---
 
 ## 🛠️ Development
+
+### Development Note
+
+This entire project has been created through iterative sessions with Claude Code (claude.ai/code). The codebase, architecture, documentation, and corrections have all been developed through AI-assisted pair programming sessions. This includes:
+- Initial circuit modeling and gain math implementation
+- Modular ES6 architecture design
+- UI/UX design and responsive layouts
+- Bug fixes and accuracy corrections (including the February 2026 V2b cathode follower fix)
+- All documentation (README, CLAUDE.md, memory files)
+
+This transparent acknowledgment reflects the collaborative nature of modern software development and the capabilities of AI-assisted coding tools.
 
 ### Prerequisites
 
@@ -270,11 +281,22 @@ This is an educational tool, not a SPICE-level circuit simulation. Known simplif
 6. **Simplified tonestack**: Passive EQ network simplified to insertion loss + modifier
 7. **No parasitic effects**: Doesn't model miller capacitance, lead dress, etc.
 
-Despite these simplifications, the simulator provides accurate insight into gain staging behavior and helps users understand where saturation occurs in the signal chain.
+The simulator aims to provide educational insight into gain staging behavior and help users understand where saturation occurs in the signal chain. Ongoing work includes verification against actual hardware measurements to improve model accuracy.
 
 ---
 
 ## ✅ Accuracy Notes
+
+### ⚠️ Current Status: Theoretical Model Under Verification
+
+This simulator is an **active development project** with ongoing accuracy verification work:
+
+- **Model status**: Based on circuit topology and theoretical calculations
+- **Hardware validation**: In progress - measurements from actual Chupacabra units are being collected
+- **Known discrepancies**: Expected until comprehensive hardware validation is complete
+- **Use case**: Educational tool for understanding gain staging concepts, not a precision measurement instrument
+
+**We welcome feedback from Chupacabra owners** who can provide measurements or observations to improve model accuracy.
 
 ### Recent Corrections (February 2026)
 
@@ -294,15 +316,35 @@ Despite these simplifications, the simulator provides accurate insight into gain
 - Pussy Trimmer grid shunt attenuator ✅ (Ceriatone-specific)
 - Focus switch +1.0 dB boost ✅ (Ceriatone-specific)
 
-### Circuit Analysis Sources
+### Model Development and Verification Status
 
 The simulator is based on:
-- Owner measurements from actual Chupacabra units
-- Standard Marshall/Jose circuit topology references
-- Ceriatone-provided schematics and documentation
-- Comparative analysis with Klein-ulator FX loop specifications
+- Standard Marshall/Jose circuit topology references (verified)
+- Ceriatone documentation and specifications (verified)
+- Klein-ulator FX loop published specifications (verified)
+- Theoretical tube stage gain calculations based on typical ECC83/12AX7 parameters
+- **Hardware measurements**: In progress - validation against actual Chupacabra units ongoing
 
-While every effort has been made to ensure accuracy, this is an **educational model** and may differ from individual amplifier units due to component tolerances, tube variations, and build differences.
+This is an **educational model** attempting to represent the amplifier's behavior. Differences from actual hardware are expected due to:
+- Component tolerances (resistors, capacitors)
+- Tube-to-tube variations (gain, threshold, compression characteristics)
+- Build variations between individual amplifiers
+- Frequency-dependent effects not modeled
+- Simplified representations of complex circuit interactions
+
+**Accuracy is ongoing work.** Specific areas under verification include:
+- Actual tube stage gain values in the Chupacabra (vs. theoretical calculations)
+- Clipping threshold levels at various stages
+- ERA switch diode clipping characteristics (actual knee sharpness and threshold)
+- Master volume interaction with tonestack loading
+- FX loop recovery control gain range
+- Power section saturation characteristics with EL34s
+
+Feedback and measurements from Chupacabra owners are welcomed to improve the model. Ideal measurements include:
+- Signal levels (RMS voltage) at test points with known control settings
+- Oscilloscope captures showing clipping onset at various stages
+- Frequency response measurements of bright switches and tonestack
+- Comparisons between simulator predictions and actual amp behavior
 
 ---
 
@@ -340,6 +382,7 @@ This project is licensed under the **MIT License**—see [LICENSE.txt](LICENSE.t
 - **Klein-ulator**: For the buffered FX loop design
 - **Marshall / Jose Arredondo**: For the foundational circuit topology
 - **The tube amp community**: For shared knowledge and circuit analysis resources
+- **Claude Code (Anthropic)**: AI-assisted development tool used to create this entire project through iterative pair programming sessions
 
 ---
 
