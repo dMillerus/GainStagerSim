@@ -128,14 +128,14 @@ Toggle between two organizational layouts:
 
 ### Development Note
 
-This entire project has been created through iterative sessions with Claude Code (claude.ai/code). The codebase, architecture, documentation, and corrections have all been developed through AI-assisted pair programming sessions. This includes:
+This entire project has been created by a **non-electrical engineer** through iterative sessions with Claude Code (claude.ai/code). The codebase, architecture, documentation, and corrections have all been developed through AI-assisted pair programming sessions. This includes:
 - Initial circuit modeling and gain math implementation
 - Modular ES6 architecture design
 - UI/UX design and responsive layouts
 - Bug fixes and accuracy corrections (including the February 2026 V2b cathode follower fix)
 - All documentation (README, CLAUDE.md, memory files)
 
-This transparent acknowledgment reflects the collaborative nature of modern software development and the capabilities of AI-assisted coding tools.
+This transparent acknowledgment reflects both the collaborative nature of modern software development and the reason expert validation is needed—the project was built through research and AI assistance, not formal electrical engineering training. **Community contributions from EE professionals and amp technicians are essential to improving model accuracy.**
 
 ### Prerequisites
 
@@ -291,12 +291,14 @@ The simulator aims to provide educational insight into gain staging behavior and
 
 This simulator is an **active development project** with ongoing accuracy verification work:
 
-- **Model status**: Based on circuit topology and theoretical calculations
-- **Hardware validation**: In progress - measurements from actual Chupacabra units are being collected
-- **Known discrepancies**: Expected until comprehensive hardware validation is complete
+- **Model status**: Based on circuit topology and theoretical calculations only
+- **Developer background**: Created by a non-electrical engineer through research and modeling
+- **Hardware measurements**: Not yet started - developer lacks equipment and expertise for accurate measurements
+- **Validation status**: No direct measurements from actual Chupacabra units have been taken
+- **Known discrepancies**: Expected until comprehensive hardware validation is completed by community experts
 - **Use case**: Educational tool for understanding gain staging concepts, not a precision measurement instrument
 
-**We welcome feedback from Chupacabra owners** who can provide measurements or observations to improve model accuracy.
+**One of the primary reasons for making this project public is to recruit help from the community** - especially electrical engineers, amp techs, and Chupacabra owners who can provide measurements, circuit analysis, or corrections to improve model accuracy. Your expertise is critically needed!
 
 ### Recent Corrections (February 2026)
 
@@ -319,11 +321,11 @@ This simulator is an **active development project** with ongoing accuracy verifi
 ### Model Development and Verification Status
 
 The simulator is based on:
-- Standard Marshall/Jose circuit topology references (verified)
-- Ceriatone documentation and specifications (verified)
-- Klein-ulator FX loop published specifications (verified)
+- Standard Marshall/Jose circuit topology references (verified from public sources)
+- Ceriatone documentation and specifications (verified from public sources)
+- Klein-ulator FX loop published specifications (verified from public sources)
 - Theoretical tube stage gain calculations based on typical ECC83/12AX7 parameters
-- **Hardware measurements**: In progress - validation against actual Chupacabra units ongoing
+- **Hardware measurements**: None taken - awaiting community contributions from those with measurement equipment and expertise
 
 This is an **educational model** attempting to represent the amplifier's behavior. Differences from actual hardware are expected due to:
 - Component tolerances (resistors, capacitors)
@@ -350,17 +352,28 @@ Feedback and measurements from Chupacabra owners are welcomed to improve the mod
 
 ## 🤝 Contributing
 
-Contributions are welcome! Whether you want to:
-- Report inaccuracies or bugs
+**Help Needed!** This project was created by a non-electrical engineer and needs community expertise to improve accuracy. Contributions are especially welcome from:
+
+- **Electrical engineers**: Circuit analysis, tube stage calculations, validation of modeling assumptions
+- **Amp technicians**: Real-world measurements, oscilloscope captures, bench testing data
+- **Chupacabra owners**: Signal level measurements, A/B comparisons between simulator and actual amp behavior
+- **Software developers**: Code improvements, bug fixes, feature additions
+- **Documentation writers**: Clarity improvements, tutorial content, technical corrections
+
+**Types of contributions:**
+- Report inaccuracies or bugs (with measurements if possible)
+- Provide circuit analysis or corrections to gain stage modeling
+- Share oscilloscope captures or voltage measurements from actual amps
 - Suggest feature improvements
 - Add support for other Ceriatone models
 - Improve the documentation
 
 **Please:**
 1. Open an issue first to discuss significant changes
-2. Follow the existing code style (see `CLAUDE.md` for conventions)
-3. Test your changes thoroughly before submitting PRs
-4. Update documentation as needed
+2. For accuracy corrections, include supporting evidence (measurements, scope captures, circuit analysis)
+3. Follow the existing code style (see `CLAUDE.md` for conventions)
+4. Test your changes thoroughly before submitting PRs
+5. Update documentation as needed
 
 For detailed developer guidance, see:
 - **CLAUDE.md**: Codebase architecture, conventions, domain context
