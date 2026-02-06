@@ -391,6 +391,19 @@ body[data-view="signal"] .signal-flow-section {
                 0 0 10px var(--color-accent-glow);
 }
 
+/* Three-position bright switches */
+.switch.subtle {
+    background: linear-gradient(180deg, #3a4a2a, #2a3a1a);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 8px rgba(200, 255, 150, 0.4);
+}
+
+.switch.aggressive {
+    background: linear-gradient(180deg, #4a3a2a, #3a2a1a);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 10px rgba(255, 200, 100, 0.5);
+}
+
 .switch-label {
     font-size: 0.7rem;
     color: var(--color-text-muted);
@@ -1188,7 +1201,7 @@ body[data-view="signal"] .signal-flow-section {
                 <h2 class="section-title">Power Section</h2>
                 <div class="controls-row">
                     <div class="control-group-unified" data-stage="master">
-                        <span class="stage-label">PPIMV</span>
+                        <span class="stage-label">Master</span>
                         <div class="control-row">
                             <div class="knob-wrapper">
                                 <div class="knob-container">
@@ -1337,14 +1350,21 @@ const tubeStages = {
 };
 
 /**
- * ERA switch tonestack loss (dB)
- * Controls the amount of signal loss through the tonestack
+ * ERA switch diode clipping configuration
+ * Located POST-V2b, PRE-Master volume
+ * Back-to-back diode pairs to ground for symmetrical clipping
  */
-const eraLoss = {
-    plexi: -7,
-    '80s': -12,
-    modern: -20
+const eraClipping = {
+    plexi: { enabled: false, threshold: 0 },    // Bypass - no diodes, straight through
+    '80s': { enabled: true, threshold: 18.0 },  // Orange diodes - moderate clipping
+    modern: { enabled: true, threshold: 12.0 }  // Purple diodes - heavy clipping
 };
+
+/**
+ * Base tonestack loss (dB)
+ * Fixed insertion loss independent of ERA switch
+ */
+const baseTonestackLoss = -10;
 
 /**
  * Pickup output levels (dBV)
@@ -1363,10 +1383,13 @@ const cableLoss = 0.5;
 
 /**
  * Bright switch boost values (dB)
+ * Three-position switches: Off / Subtle (500pF) / Aggressive (4700pF)
  */
 const brightBoost = {
-    mid: 1.5,   // Bright 1, Send Bright
-    high: 2.5   // Bright 2, Return Bright
+    subtle: 1.5,      // 500pF cap - moderate high-frequency boost
+    aggressive: 2.5,  // 4700pF cap - aggressive high-frequency boost
+    mid: 1.5,         // Send Bright (legacy)
+    high: 2.5         // Return Bright (legacy)
 };
 
 /**
@@ -1388,7 +1411,7 @@ const meterConfig = {
  */
 const stageCounts = {
     input: 3,
-    preamp: 8,  // Added Pussy Trim between Gain 2 and V2a
+    preamp: 9,  // Added Pussy Trim + ERA clipping stage
     fxloop: 6,
     power: 6,
     output: 1
@@ -1401,9 +1424,9 @@ const defaultState = {
     pickup: 'bridge',
     guitarVolume: 10,
     gain1: 5,
-    bright1: false,
+    bright1: 'off',  // 'off' | 'subtle' | 'aggressive'
     gain2: 5,
-    bright2: false,
+    bright2: 'off',  // 'off' | 'subtle' | 'aggressive'
     era: '80s',
     bass: 5,
     middle: 5,
@@ -1429,7 +1452,8 @@ const defaultState = {
  */
 const AmpConfig = {
     tubeStages,
-    eraLoss,
+    eraClipping,
+    baseTonestackLoss,
     pickupLevels,
     cableLoss,
     brightBoost,
@@ -1549,6 +1573,26 @@ function eraModifiedTaper(masterTaper, era) {
 }
 
 /**
+ * Diode clipping model for back-to-back diode pairs
+ * Models hard clipping behavior of diodes to ground (ERA switch)
+ * @param {number} level - Input level in dBV
+ * @param {number} threshold - Diode forward voltage threshold in dBV
+ * @param {string} type - 'symmetrical' or 'asymmetrical' (default symmetrical)
+ * @returns {Object} { clamped: output level, raw: input level, drive: clipping amount }
+ */
+function diodeClip(level, threshold, type = 'symmetrical') {
+    if (level <= threshold) {
+        return { clamped: level, raw: level, drive: 0 };
+    }
+
+    // Hard clip at threshold (diodes conduct and shunt to ground)
+    const clampedLevel = threshold;
+    const drive = level - clampedLevel;
+
+    return { clamped: clampedLevel, raw: level, drive };
+}
+
+/**
  * Pussy Trim taper - variable resistor to ground on V2a grid
  * At 10: 0 dB (signal passes through)
  * At 0: Full cut (-40 dB, effectively silent)
@@ -1654,10 +1698,11 @@ function calculateSignalChain(state) {
     // Stage 5: Gain 1 pot + Bright 1 switch
     const gain1Atten = logTaper(s.gain1);
     level += gain1Atten;
-    if (s.bright1) {
-        level += brightBoost.mid;
-    }
-    addStage('Gain 1', level, gain1Atten + (s.bright1 ? brightBoost.mid : 0), 0, 'preamp');
+    let bright1Boost = 0;
+    if (s.bright1 === 'subtle') bright1Boost = brightBoost.subtle;
+    if (s.bright1 === 'aggressive') bright1Boost = brightBoost.aggressive;
+    level += bright1Boost;
+    addStage('Gain 1', level, gain1Atten + bright1Boost, 0, 'preamp');
 
     // Stage 6: V1b (second gain stage)
     const v1b = tubeStages.v1b;
@@ -1669,10 +1714,11 @@ function calculateSignalChain(state) {
     // Stage 7: Gain 2 pot + Bright 2 switch
     const gain2Atten = logTaper(s.gain2);
     level += gain2Atten;
-    if (s.bright2) {
-        level += brightBoost.high;
-    }
-    addStage('Gain 2', level, gain2Atten + (s.bright2 ? brightBoost.high : 0), 0, 'preamp');
+    let bright2Boost = 0;
+    if (s.bright2 === 'subtle') bright2Boost = brightBoost.subtle;
+    if (s.bright2 === 'aggressive') bright2Boost = brightBoost.aggressive;
+    level += bright2Boost;
+    addStage('Gain 2', level, gain2Atten + bright2Boost, 0, 'preamp');
 
     // Stage 8: Pussy Trim (V2a grid shunt - variable resistor to ground)
     const pussyTrimAtten = pussyTrimTaper(s.pussyTrimmer);
@@ -1686,10 +1732,9 @@ function calculateSignalChain(state) {
     level = clip.clamped;
     addStage('V2a', level, v2a.gain, clip.drive, 'preamp', v2a.threshold);
 
-    // Stage 10: Tonestack (ERA-dependent loss)
-    const tonestackLoss = eraLoss[s.era];
+    // Stage 10: Tonestack (fixed base loss + EQ modification)
     const toneMod = tonestackMod(s.bass, s.middle, s.treble);
-    const totalToneLoss = tonestackLoss + toneMod;
+    const totalToneLoss = baseTonestackLoss + toneMod;
     level += totalToneLoss;
     addStage('Tonestack', level, totalToneLoss, 0, 'preamp');
 
@@ -1700,36 +1745,48 @@ function calculateSignalChain(state) {
     level = clip.clamped;
     addStage('V2b', level, v2b.gain, clip.drive, 'preamp', v2b.threshold);
 
+    // Stage 12: ERA Diode Clipping (post-V2b, pre-Master)
+    const eraConfig = eraClipping[s.era];
+    if (eraConfig.enabled) {
+        const eraClip = diodeClip(level, eraConfig.threshold, 'symmetrical');
+        level = eraClip.clamped;
+        const eraLabel = s.era === '80s' ? 'ERA (80s)' : 'ERA (Mod)';
+        addStage(eraLabel, level, 0, eraClip.drive, 'preamp');
+    } else {
+        // Plexi mode - bypass (no clipping)
+        addStage('ERA (60s)', level, 0, 0, 'preamp');
+    }
+
     const preampOutput = level;
 
     // FX Loop Section (Klein-ulator)
     if (s.loopEnabled) {
-        // Stage 12: FX Send level
+        // Stage 13: FX Send level
         const sendLevel = linearTaper(s.send);
         level += sendLevel;
         addStage('Send', level, sendLevel, 0, 'fxloop');
 
-        // Stage 13: Send bright switch
+        // Stage 14: Send bright switch
         if (s.sendBright) {
             level += brightBoost.mid;
             addStage('Send Brt', level, brightBoost.mid, 0, 'fxloop');
         }
 
-        // Stage 14: FX Loop out (to pedals) - assume unity gain external
+        // Stage 15: FX Loop out (to pedals) - assume unity gain external
         addStage('Loop Out', level, 0, 0, 'fxloop');
 
-        // Stage 15: FX Return level
+        // Stage 16: FX Return level
         const returnLevel = linearTaper(s.return);
         level += returnLevel;
         addStage('Return', level, returnLevel, 0, 'fxloop');
 
-        // Stage 16: Return bright switch
+        // Stage 17: Return bright switch
         if (s.returnBright) {
             level += brightBoost.high;
             addStage('Ret Brt', level, brightBoost.high, 0, 'fxloop');
         }
 
-        // Stage 17: Recovery stage (compensation at noon)
+        // Stage 18: Recovery stage (compensation at noon)
         const recoveryGain = linearTaper(s.recovery) + recoveryCompensation;
         level += recoveryGain;
         addStage('Recovery', level, recoveryGain, 0, 'fxloop');
@@ -1737,43 +1794,43 @@ function calculateSignalChain(state) {
 
     // Power Section
 
-    // Stage 18: Master volume
+    // Stage 19: Master volume
     let masterTaper = logTaper(s.master);
     masterTaper = eraModifiedTaper(masterTaper, s.era);
     level += masterTaper;
     addStage('Master', level, masterTaper, 0, 'power');
 
-    // Stage 19: Focus switch (slight presence boost)
+    // Stage 20: Focus switch (slight presence boost)
     if (s.focus) {
         level += 1.0;
         addStage('Focus', level, 1.0, 0, 'power');
     }
 
-    // Stage 20: Presence - high frequency negative feedback
+    // Stage 21: Presence - high frequency negative feedback
     const presenceGain = nfbGain(s.presence);
     level += presenceGain;
     addStage('Presence', level, presenceGain, 0, 'power');
 
-    // Stage 21: Resonance - low frequency negative feedback
+    // Stage 22: Resonance - low frequency negative feedback
     const resonanceGain = nfbGain(s.resonance);
     level += resonanceGain;
     addStage('Resonance', level, resonanceGain, 0, 'power');
 
-    // Stage 22: Phase Inverter
+    // Stage 23: Phase Inverter
     const pi = tubeStages.pi;
     level += pi.gain;
     clip = softClip(level, pi.threshold, pi.knee);
     level = clip.clamped;
     addStage('PI', level, pi.gain, clip.drive, 'power', pi.threshold);
 
-    // Stage 23: Power tubes (4×EL34)
+    // Stage 24: Power tubes (4×EL34)
     const power = tubeStages.power;
     level += power.gain;
     clip = softClip(level, power.threshold, power.knee);
     level = clip.clamped;
     addStage('Power', level, power.gain, clip.drive, 'power', power.threshold);
 
-    // Stage 24: Captor X output
+    // Stage 25: Captor X output
     level += s.captorAtten;
     addStage('Captor X', level, s.captorAtten, 0, 'output');
 
@@ -2011,9 +2068,9 @@ function generateToneRecommendation(stages, state) {
     } else if (heavyClipping.length > 3) {
         tone = `Heavily saturated tone with ${heavyClipping.length} stages in hard clipping. `;
         tone += 'Expect compressed dynamics and thick distortion. ';
-        if (s.era === 'modern') tone += 'Modern voicing adds tight low-end definition.';
-        else if (s.era === 'plexi') tone += 'Plexi voicing provides open, dynamic response.';
-        else tone += "'80s voicing balances crunch with clarity.";
+        if (s.era === 'modern') tone += 'Modern voicing with heavy diode compression adds tight definition.';
+        else if (s.era === 'plexi') tone += 'Plexi mode bypasses ERA clipping for cleanest, most dynamic response.';
+        else tone += "'80s voicing with moderate diode clipping balances crunch with clarity.";
     } else if (clippingStages.length > 0) {
         tone = `${clippingStages.length} stage(s) in soft clipping — `;
 
@@ -2046,8 +2103,31 @@ function generateToneRecommendation(stages, state) {
         tone += ' FX loop bright switches add presence to the signal.';
     }
 
-    if (s.bright1 || s.bright2) {
-        tone += ' Preamp bright switches engaged for added sparkle.';
+    if (s.bright1 !== 'off' || s.bright2 !== 'off') {
+        const bright1Desc = s.bright1 === 'aggressive' ? 'aggressive (4700pF)' :
+                           s.bright1 === 'subtle' ? 'subtle (500pF)' : '';
+        const bright2Desc = s.bright2 === 'aggressive' ? 'aggressive (4700pF)' :
+                           s.bright2 === 'subtle' ? 'subtle (500pF)' : '';
+
+        if (bright1Desc && bright2Desc) {
+            tone += ` Bright 1 ${bright1Desc}, Bright 2 ${bright2Desc}.`;
+        } else if (bright1Desc) {
+            tone += ` Bright 1 ${bright1Desc}.`;
+        } else if (bright2Desc) {
+            tone += ` Bright 2 ${bright2Desc}.`;
+        }
+    }
+
+    // Add ERA clipping description
+    const eraStage = stages.find(st => st.name.startsWith('ERA'));
+    if (eraStage && eraStage.drive > 0) {
+        if (s.era === 'modern') {
+            tone += ' ERA purple diodes heavily clipping signal for maximum compression.';
+        } else if (s.era === '80s') {
+            tone += ' ERA orange diodes moderately clipping for controlled saturation.';
+        }
+    } else if (s.era === 'plexi') {
+        tone += ' ERA bypassed (60s mode) for cleanest signal path.';
     }
 
     const toneTextEl = document.getElementById('tone-text');
@@ -2592,14 +2672,15 @@ function setupValueEdit(onUpdate) {
 /**
  * Switch configuration
  * Maps switch IDs to their state keys
+ * type: 'toggle' for boolean switches, 'three-position' for bright switches
  */
 const switchConfig = {
-    'loop-bypass': { stateKey: 'loopEnabled', default: true },
-    'send-bright': { stateKey: 'sendBright', default: false },
-    'return-bright': { stateKey: 'returnBright', default: false },
-    'focus': { stateKey: 'focus', default: false },
-    'bright1': { stateKey: 'bright1', default: false },
-    'bright2': { stateKey: 'bright2', default: false }
+    'loop-bypass': { stateKey: 'loopEnabled', default: true, type: 'toggle' },
+    'send-bright': { stateKey: 'sendBright', default: false, type: 'toggle' },
+    'return-bright': { stateKey: 'returnBright', default: false, type: 'toggle' },
+    'focus': { stateKey: 'focus', default: false, type: 'toggle' },
+    'bright1': { stateKey: 'bright1', default: 'off', type: 'three-position' },
+    'bright2': { stateKey: 'bright2', default: 'off', type: 'three-position' }
 };
 
 /**
@@ -2616,20 +2697,35 @@ function setupSwitches(onUpdate) {
         if (!el) return;
 
         // Set initial state
-        if (config.default) {
-            el.classList.add('active');
-            el.dataset.state = 'ON';
+        if (config.type === 'toggle') {
+            if (config.default) {
+                el.classList.add('active');
+                el.dataset.state = 'ON';
+            }
+        } else if (config.type === 'three-position') {
+            el.dataset.state = config.default.toUpperCase();
         }
 
         const handleClick = () => {
-            const currentState = el.classList.contains('active');
-            const newState = !currentState;
+            if (config.type === 'toggle') {
+                const currentState = el.classList.contains('active');
+                const newState = !currentState;
 
-            // Sync both main and SF versions
-            syncSwitch(id, newState);
+                // Sync both main and SF versions
+                syncSwitch(id, newState);
 
-            // Notify state change
-            onUpdate(config.stateKey, newState);
+                // Notify state change
+                onUpdate(config.stateKey, newState);
+            } else if (config.type === 'three-position') {
+                const currentState = el.dataset.state?.toLowerCase() || 'off';
+                const nextState = cycleThreePosition(currentState);
+
+                // Sync both main and SF versions
+                syncThreePosition(id, nextState);
+
+                // Notify state change
+                onUpdate(config.stateKey, nextState);
+            }
         };
 
         el.addEventListener('click', handleClick);
@@ -2647,14 +2743,25 @@ function setupSwitches(onUpdate) {
             const mainEl = document.getElementById(mirrorId);
             if (!mainEl) return;
 
-            const currentState = mainEl.classList.contains('active');
-            const newState = !currentState;
+            if (config.type === 'toggle') {
+                const currentState = mainEl.classList.contains('active');
+                const newState = !currentState;
 
-            // Sync both versions
-            syncSwitch(mirrorId, newState);
+                // Sync both versions
+                syncSwitch(mirrorId, newState);
 
-            // Notify state change
-            onUpdate(config.stateKey, newState);
+                // Notify state change
+                onUpdate(config.stateKey, newState);
+            } else if (config.type === 'three-position') {
+                const currentState = mainEl.dataset.state?.toLowerCase() || 'off';
+                const nextState = cycleThreePosition(currentState);
+
+                // Sync both versions
+                syncThreePosition(mirrorId, nextState);
+
+                // Notify state change
+                onUpdate(config.stateKey, nextState);
+            }
         };
 
         sw.addEventListener('click', handleClick);
@@ -2662,6 +2769,38 @@ function setupSwitches(onUpdate) {
     });
 
     return () => cleanupFns.forEach(fn => fn());
+}
+
+/**
+ * Cycle through three-position switch states
+ * @param {string} currentState - Current state ('off', 'subtle', 'aggressive')
+ * @returns {string} Next state
+ */
+function cycleThreePosition(currentState) {
+    const states = ['off', 'subtle', 'aggressive'];
+    const currentIndex = states.indexOf(currentState);
+    const nextIndex = (currentIndex + 1) % states.length;
+    return states[nextIndex];
+}
+
+/**
+ * Sync three-position switch state between main and SF versions
+ * @param {string} baseId - Base switch ID (without -sf)
+ * @param {string} state - New state ('off', 'subtle', 'aggressive')
+ */
+function syncThreePosition(baseId, state) {
+    const mainEl = document.getElementById(baseId);
+    const sfEl = document.getElementById(`${baseId}-sf`);
+
+    [mainEl, sfEl].forEach(el => {
+        if (el) {
+            el.dataset.state = state.toUpperCase();
+            // Add visual classes based on state
+            el.classList.toggle('active', state !== 'off');
+            el.classList.toggle('subtle', state === 'subtle');
+            el.classList.toggle('aggressive', state === 'aggressive');
+        }
+    });
 }
 
 /**

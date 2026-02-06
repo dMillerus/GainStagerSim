@@ -51,7 +51,7 @@ GainStagerSim/
 
 ## Domain Context
 
-- **Chupacabra 100**: Jose Arredondo-inspired high-gain Marshall derivative. 4×EL34 power section, three cascaded ECC83 preamp stages, dual gain controls, ERA switch (Plexi/'80s/Modern voicing), PPIMV, buffered FX loop.
+- **Chupacabra 100**: Jose Arredondo-inspired high-gain Marshall derivative. 4×EL34 power section, three cascaded ECC83 preamp stages, dual gain controls, ERA switch (Plexi/'80s/Modern voicing), standard pre-PI master volume, buffered FX loop.
 - **Klein-ulator**: Standalone buffered FX loop unit with SEND/RETURN/RECOVERY controls. Adds ~+2.5 dB net gain at default settings.
 - **Signal chain**: 21+ metered stages from guitar pickup through Captor X reactive load.
 
