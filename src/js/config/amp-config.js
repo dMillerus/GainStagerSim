@@ -17,14 +17,21 @@ export const tubeStages = {
 };
 
 /**
- * ERA switch tonestack loss (dB)
- * Controls the amount of signal loss through the tonestack
+ * ERA switch diode clipping configuration
+ * Located POST-V2b, PRE-Master volume
+ * Back-to-back diode pairs to ground for symmetrical clipping
  */
-export const eraLoss = {
-    plexi: -7,
-    '80s': -12,
-    modern: -20
+export const eraClipping = {
+    plexi: { enabled: false, threshold: 0 },    // Bypass - no diodes, straight through
+    '80s': { enabled: true, threshold: 18.0 },  // Orange diodes - moderate clipping
+    modern: { enabled: true, threshold: 12.0 }  // Purple diodes - heavy clipping
 };
+
+/**
+ * Base tonestack loss (dB)
+ * Fixed insertion loss independent of ERA switch
+ */
+export const baseTonestackLoss = -10;
 
 /**
  * Pickup output levels (dBV)
@@ -43,10 +50,13 @@ export const cableLoss = 0.5;
 
 /**
  * Bright switch boost values (dB)
+ * Three-position switches: Off / Subtle (500pF) / Aggressive (4700pF)
  */
 export const brightBoost = {
-    mid: 1.5,   // Bright 1, Send Bright
-    high: 2.5   // Bright 2, Return Bright
+    subtle: 1.5,      // 500pF cap - moderate high-frequency boost
+    aggressive: 2.5,  // 4700pF cap - aggressive high-frequency boost
+    mid: 1.5,         // Send Bright (legacy)
+    high: 2.5         // Return Bright (legacy)
 };
 
 /**
@@ -68,10 +78,10 @@ export const meterConfig = {
  */
 export const stageCounts = {
     input: 3,
-    preamp: 8,  // Added Pussy Trim between Gain 2 and V2a
-    fxloop: 6,
-    power: 6,
-    output: 1
+    preamp: 10,  // V1a, Gain1, V1b, Gain2, Pussy Trim, V2a, V2b, ERA, Master, Tonestack
+    fxloop: 6,   // Send, Send Brt (optional), Loop Out, Return, Ret Brt (optional), Recovery
+    power: 5,    // Focus (optional), Presence, Resonance, PI, Power
+    output: 1    // Captor X
 };
 
 /**
@@ -81,9 +91,9 @@ export const defaultState = {
     pickup: 'bridge',
     guitarVolume: 10,
     gain1: 5,
-    bright1: false,
+    bright1: 'off',  // 'off' | 'subtle' | 'aggressive'
     gain2: 5,
-    bright2: false,
+    bright2: 'off',  // 'off' | 'subtle' | 'aggressive'
     era: '80s',
     bass: 5,
     middle: 5,
@@ -109,7 +119,8 @@ export const defaultState = {
  */
 export const AmpConfig = {
     tubeStages,
-    eraLoss,
+    eraClipping,
+    baseTonestackLoss,
     pickupLevels,
     cableLoss,
     brightBoost,

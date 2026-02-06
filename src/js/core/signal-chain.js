@@ -3,8 +3,8 @@
  * Traces signal through all 21+ stages
  */
 
-import { tubeStages, eraLoss, pickupLevels, cableLoss, brightBoost, recoveryCompensation } from '../config/amp-config.js';
-import { logTaper, linearTaper, softClip, tonestackMod, nfbGain, eraModifiedTaper, roundLevel, pussyTrimTaper } from './gain-math.js';
+import { tubeStages, eraClipping, baseTonestackLoss, pickupLevels, cableLoss, brightBoost, recoveryCompensation } from '../config/amp-config.js';
+import { logTaper, linearTaper, softClip, diodeClip, tonestackMod, nfbGain, eraModifiedTaper, roundLevel, pussyTrimTaper } from './gain-math.js';
 
 /**
  * Stage data structure
@@ -63,10 +63,11 @@ export function calculateSignalChain(state) {
     // Stage 5: Gain 1 pot + Bright 1 switch
     const gain1Atten = logTaper(s.gain1);
     level += gain1Atten;
-    if (s.bright1) {
-        level += brightBoost.mid;
-    }
-    addStage('Gain 1', level, gain1Atten + (s.bright1 ? brightBoost.mid : 0), 0, 'preamp');
+    let bright1Boost = 0;
+    if (s.bright1 === 'subtle') bright1Boost = brightBoost.subtle;
+    if (s.bright1 === 'aggressive') bright1Boost = brightBoost.aggressive;
+    level += bright1Boost;
+    addStage('Gain 1', level, gain1Atten + bright1Boost, 0, 'preamp');
 
     // Stage 6: V1b (second gain stage)
     const v1b = tubeStages.v1b;
@@ -78,10 +79,11 @@ export function calculateSignalChain(state) {
     // Stage 7: Gain 2 pot + Bright 2 switch
     const gain2Atten = logTaper(s.gain2);
     level += gain2Atten;
-    if (s.bright2) {
-        level += brightBoost.high;
-    }
-    addStage('Gain 2', level, gain2Atten + (s.bright2 ? brightBoost.high : 0), 0, 'preamp');
+    let bright2Boost = 0;
+    if (s.bright2 === 'subtle') bright2Boost = brightBoost.subtle;
+    if (s.bright2 === 'aggressive') bright2Boost = brightBoost.aggressive;
+    level += bright2Boost;
+    addStage('Gain 2', level, gain2Atten + bright2Boost, 0, 'preamp');
 
     // Stage 8: Pussy Trim (V2a grid shunt - variable resistor to ground)
     const pussyTrimAtten = pussyTrimTaper(s.pussyTrimmer);
@@ -95,50 +97,68 @@ export function calculateSignalChain(state) {
     level = clip.clamped;
     addStage('V2a', level, v2a.gain, clip.drive, 'preamp', v2a.threshold);
 
-    // Stage 10: Tonestack (ERA-dependent loss)
-    const tonestackLoss = eraLoss[s.era];
-    const toneMod = tonestackMod(s.bass, s.middle, s.treble);
-    const totalToneLoss = tonestackLoss + toneMod;
-    level += totalToneLoss;
-    addStage('Tonestack', level, totalToneLoss, 0, 'preamp');
-
-    // Stage 11: V2b (fourth gain stage / recovery)
+    // Stage 10: V2b (fourth preamp gain stage)
     const v2b = tubeStages.v2b;
     level += v2b.gain;
     clip = softClip(level, v2b.threshold, v2b.knee);
     level = clip.clamped;
     addStage('V2b', level, v2b.gain, clip.drive, 'preamp', v2b.threshold);
 
+    // Stage 11: ERA Diode Clipping (post-V2b, pre-Master)
+    const eraConfig = eraClipping[s.era];
+    if (eraConfig.enabled) {
+        const eraClip = diodeClip(level, eraConfig.threshold, 'symmetrical');
+        level = eraClip.clamped;
+        const eraLabel = s.era === '80s' ? 'ERA (80s)' : 'ERA (Mod)';
+        addStage(eraLabel, level, 0, eraClip.drive, 'preamp');
+    } else {
+        // Plexi mode - bypass (no clipping)
+        addStage('ERA (60s)', level, 0, 0, 'preamp');
+    }
+
+    // Stage 12: Master volume (pre-tonestack master)
+    let masterTaper = logTaper(s.master);
+    masterTaper = eraModifiedTaper(masterTaper, s.era);
+    level += masterTaper;
+    addStage('Master', level, masterTaper, 0, 'preamp');
+
+    // Stage 13: Tonestack (fixed base loss + EQ modification)
+    const toneMod = tonestackMod(s.bass, s.middle, s.treble);
+    const totalToneLoss = baseTonestackLoss + toneMod;
+    level += totalToneLoss;
+    addStage('Tonestack', level, totalToneLoss, 0, 'preamp');
+
+    // Preamp output marker (after tonestack, before FX loop)
     const preampOutput = level;
 
     // FX Loop Section (Klein-ulator)
     if (s.loopEnabled) {
-        // Stage 12: FX Send level
+        // Stage 14: FX Send level
         const sendLevel = linearTaper(s.send);
         level += sendLevel;
         addStage('Send', level, sendLevel, 0, 'fxloop');
 
-        // Stage 13: Send bright switch
+        // Stage 15: Send bright switch
         if (s.sendBright) {
             level += brightBoost.mid;
             addStage('Send Brt', level, brightBoost.mid, 0, 'fxloop');
         }
 
-        // Stage 14: FX Loop out (to pedals) - assume unity gain external
+        // Stage 16: FX Loop out (to pedals) - assume unity gain external
         addStage('Loop Out', level, 0, 0, 'fxloop');
 
-        // Stage 15: FX Return level
+        // Stage 17: FX Return level
         const returnLevel = linearTaper(s.return);
         level += returnLevel;
         addStage('Return', level, returnLevel, 0, 'fxloop');
 
-        // Stage 16: Return bright switch
+        // Stage 18: Return bright switch
         if (s.returnBright) {
             level += brightBoost.high;
             addStage('Ret Brt', level, brightBoost.high, 0, 'fxloop');
         }
 
-        // Stage 17: Recovery stage (compensation at noon)
+        // Stage 19: Recovery stage (compensation at noon)
         const recoveryGain = linearTaper(s.recovery) + recoveryCompensation;
         level += recoveryGain;
         addStage('Recovery', level, recoveryGain, 0, 'fxloop');
@@ -146,43 +166,37 @@ export function calculateSignalChain(state) {
 
     // Power Section
 
-    // Stage 18: Master volume
-    let masterTaper = logTaper(s.master);
-    masterTaper = eraModifiedTaper(masterTaper, s.era);
-    level += masterTaper;
-    addStage('Master', level, masterTaper, 0, 'power');
-
-    // Stage 19: Focus switch (slight presence boost)
+    // Stage 20: Focus switch (slight presence boost)
     if (s.focus) {
         level += 1.0;
         addStage('Focus', level, 1.0, 0, 'power');
     }
 
-    // Stage 20: Presence - high frequency negative feedback
+    // Stage 21: Presence - high frequency negative feedback
     const presenceGain = nfbGain(s.presence);
     level += presenceGain;
     addStage('Presence', level, presenceGain, 0, 'power');
 
-    // Stage 21: Resonance - low frequency negative feedback
+    // Stage 22: Resonance - low frequency negative feedback
     const resonanceGain = nfbGain(s.resonance);
     level += resonanceGain;
     addStage('Resonance', level, resonanceGain, 0, 'power');
 
-    // Stage 22: Phase Inverter
+    // Stage 23: Phase Inverter
     const pi = tubeStages.pi;
     level += pi.gain;
     clip = softClip(level, pi.threshold, pi.knee);
     level = clip.clamped;
     addStage('PI', level, pi.gain, clip.drive, 'power', pi.threshold);
 
-    // Stage 23: Power tubes (4×EL34)
+    // Stage 24: Power tubes (4×EL34)
     const power = tubeStages.power;
     level += power.gain;
     clip = softClip(level, power.threshold, power.knee);
     level = clip.clamped;
     addStage('Power', level, power.gain, clip.drive, 'power', power.threshold);
 
-    // Stage 24: Captor X output
+    // Stage 25: Captor X output
     level += s.captorAtten;
     addStage('Captor X', level, s.captorAtten, 0, 'output');
 
