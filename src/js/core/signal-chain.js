@@ -4,7 +4,7 @@
  */
 
 import { tubeStages, eraClipping, baseTonestackLoss, pickupLevels, cableLoss, brightBoost, recoveryCompensation } from '../config/amp-config.js';
-import { logTaper, linearTaper, softClip, diodeClip, tonestackMod, nfbGain, eraModifiedTaper, roundLevel, pussyTrimTaper } from './gain-math.js';
+import { logTaper, linearTaper, softClip, asymSoftClip, diodeClip, tonestackMod, nfbGain, eraModifiedTaper, roundLevel, pussyTrimTaper } from './gain-math.js';
 
 /**
  * Stage data structure
@@ -124,8 +124,7 @@ export function calculateSignalChain(state) {
     }
 
     // Stage 12: Master volume (pre-tonestack master)
-    let masterTaper = logTaper(s.master);
-    masterTaper = eraModifiedTaper(masterTaper, s.era);
+    const masterTaper = logTaper(s.master);
     level += masterTaper;
     addStage('Master', level, masterTaper, 0, 'preamp');
 
@@ -196,10 +195,10 @@ export function calculateSignalChain(state) {
     level = clip.clamped;
     addStage('PI', level, pi.gain, clip.drive, 'power', pi.threshold);
 
-    // Stage 24: Power tubes (4×EL34)
+    // Stage 24: Power tubes (4×EL34) — cathode-biased, asymmetric clipping
     const power = tubeStages.power;
     level += power.gain;
-    clip = softClip(level, power.threshold, power.knee);
+    clip = asymSoftClip(level, power.threshold, power.knee);
     level = clip.clamped;
     addStage('Power', level, power.gain, clip.drive, 'power', power.threshold);
 

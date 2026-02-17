@@ -49,6 +49,24 @@ export function softClip(level, threshold, knee = 6) {
 }
 
 /**
+ * Asymmetric soft clip for EL34 cathode-biased output stage
+ * EL34 power tubes clip asymmetrically — positive and negative half-cycles
+ * compress at different rates due to cathode bias operating point.
+ * @param {number} level - Input level in dBV
+ * @param {number} threshold - Nominal clipping threshold in dBV
+ * @param {number} knee - Knee width in dB (default 8)
+ * @param {number} asymmetry - Fractional threshold offset per half-cycle (default 0.15)
+ * @returns {Object} { clamped, raw, drive }
+ */
+export function asymSoftClip(level, threshold, knee = 8, asymmetry = 0.15) {
+    // Positive peaks clip ~15% earlier; negative peaks clip ~15% later
+    const adjustedThreshold = level >= 0
+        ? threshold * (1 - asymmetry)
+        : threshold * (1 + asymmetry);
+    return softClip(level, adjustedThreshold, knee);
+}
+
+/**
  * Get clipping state for LED color
  * @param {number} drive - Amount of compression/drive in dB
  * @param {number} level - Current level in dBV
@@ -71,7 +89,10 @@ export function getClipState(drive, level, threshold) {
  * @returns {number} Modification in dB
  */
 export function tonestackMod(bass, middle, treble) {
-    return ((bass - 5) + (middle - 5) + (treble - 5)) * 0.3;
+    const bassEffect   = (bass   - 5) * 0.3;  // ±1.5 dB — broad shelf, moderate level impact
+    const midEffect    = (middle - 5) * 1.0;  // ±5.0 dB — Marshall mid scoop dominates level
+    const trebleEffect = (treble - 5) * 0.4;  // ±2.0 dB — treble presence
+    return bassEffect + midEffect + trebleEffect;
 }
 
 /**
@@ -80,18 +101,21 @@ export function tonestackMod(bass, middle, treble) {
  * @returns {number} Gain in dB (±3 range)
  */
 export function nfbGain(value) {
-    return (value - 5) * 0.6;
+    // Real NFB networks have diminishing returns at extremes — tanh provides
+    // the same ±3 dB range as the old linear formula but compresses at the limits.
+    const normalized = (value - 5) / 5;  // -1.0 to +1.0
+    return Math.tanh(normalized) * 3;    // ±3 dB range, compressed at extremes (~±2.76 dB at 0/10)
 }
 
 /**
- * Calculate ERA-modified master taper
+ * @deprecated ERA diodes are upstream of the master volume pot and do not
+ * affect its taper curve. This function has no circuit basis and is no longer
+ * called. Retained for API compatibility only.
  * @param {number} masterTaper - Base master taper value
- * @param {string} era - ERA switch position
- * @returns {number} Modified taper value
+ * @param {string} era - ERA switch position (ignored)
+ * @returns {number} masterTaper unchanged
  */
 export function eraModifiedTaper(masterTaper, era) {
-    if (era === 'modern') return masterTaper * 1.1;  // Tighter
-    if (era === 'plexi') return masterTaper * 0.9;   // Looser
     return masterTaper;
 }
 
@@ -104,15 +128,10 @@ export function eraModifiedTaper(masterTaper, era) {
  * @returns {Object} { clamped: output level, raw: input level, drive: clipping amount }
  */
 export function diodeClip(level, threshold, type = 'symmetrical') {
-    if (level <= threshold) {
-        return { clamped: level, raw: level, drive: 0 };
-    }
-
-    // Hard clip at threshold (diodes conduct and shunt to ground)
-    const clampedLevel = threshold;
-    const drive = level - clampedLevel;
-
-    return { clamped: clampedLevel, raw: level, drive };
+    // Silicon diodes have an exponential knee — knee=2 gives snappier character
+    // than tube stages (knee=6) while remaining softer than a hard brick-wall clip.
+    // The `type` parameter is retained for API compatibility but not used.
+    return softClip(level, threshold, 2);
 }
 
 /**
